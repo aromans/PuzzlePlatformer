@@ -1,0 +1,2 @@
+C:\Dev\PuzzlePlatformer\Debug\PuzzlePlatformer.exe
+C:\Dev\PuzzlePlatformer\Debug\PuzzlePlatformer.pdb
