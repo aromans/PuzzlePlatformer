@@ -1,6 +1,6 @@
 #include "Shader.h"
 
-Shader::Shader() : m_ShaderID(0), m_UniformModel(0), m_UniformProjection(0) { }
+Shader::Shader() : m_ShaderID(0), m_UniformModel(0), m_UniformProjection(0), m_UniformView(0) { }
 
 Shader::~Shader() { Clear(); }
 
@@ -44,6 +44,11 @@ GLuint Shader::GetModelLocation()
 	return m_UniformModel;
 }
 
+GLuint Shader::GetViewLocation()
+{
+	return m_UniformView;
+}
+
 void Shader::UseShader()
 {
 	// TODO: Print Warning if ShaderID is 0 -> No Shader being used!
@@ -59,6 +64,7 @@ void Shader::Clear()
 
 	m_UniformModel = 0;
 	m_UniformProjection = 0;
+	m_UniformView = 0;
 }
 
 void Shader::CompileShader(const char* vertex_code, const char* fragment_code)
@@ -95,6 +101,7 @@ void Shader::CompileShader(const char* vertex_code, const char* fragment_code)
 	// Uniform Introduction
 	m_UniformModel = glGetUniformLocation(m_ShaderID, "model");
 	m_UniformProjection = glGetUniformLocation(m_ShaderID, "projection");
+	m_UniformView = glGetUniformLocation(m_ShaderID, "view");
 }
 
 void Shader::AddShader(const GLuint& program, const char* shaderCode, GLenum shaderType)

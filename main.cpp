@@ -10,10 +10,29 @@ int main(int argc, char *args[]) {
 
 	game->Start();
 
+	double t = 0.0;
+	const double dt = 0.01;
+	double currTime = glfwGetTime();
+	double accumulator = 0.0;
+
 	// Game Loop
 	while (game->IsRunning()) {
-		game->HandleInput();
-		game->Update();
+
+		double newTime = glfwGetTime();
+		double frameTime = newTime - currTime;
+		if (frameTime > 0.25)
+			frameTime = 0.25;
+		currTime = newTime;
+
+		accumulator += frameTime;
+
+		while (accumulator >= dt) {
+			game->HandleInput(dt);
+			game->Update();
+			t += dt;
+			accumulator -= dt;
+		}
+
 		game->Render();
 	}
 

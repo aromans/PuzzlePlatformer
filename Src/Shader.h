@@ -21,6 +21,7 @@ public:
 
 	GLuint GetProjectionLocation();
 	GLuint GetModelLocation();
+	GLuint GetViewLocation();
 
 	void UseShader();
 	void Clear();
@@ -33,5 +34,6 @@ private:
 	GLuint m_ShaderID;
 	GLuint m_UniformProjection;
 	GLuint m_UniformModel;
+	GLuint m_UniformView;
 };
 
