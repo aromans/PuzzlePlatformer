@@ -12,8 +12,8 @@ int main(int argc, char *args[]) {
 
 	// Game Loop
 	while (game->IsRunning()) {
-		game->Update();
 		game->HandleInput();
+		game->Update();
 		game->Render();
 	}
 

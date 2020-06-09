@@ -1,6 +1,14 @@
 #include "Game.h"
 
 #include <stdio.h>
+#include <cmath>
+#include <string>
+
+Game::~Game() 
+{
+	glfwDestroyWindow(mainWindow);
+	glfwTerminate();
+}
 
 bool Game::Initialize()
 {
@@ -27,11 +35,12 @@ bool Game::Initialize()
 	}
 
 	// Get Buffer Size Information
-	int bufferWidth, bufferHeight;
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
+	glfwGetFramebufferSize(mainWindow, &m_BufferWidth, &m_BufferHeight);
 
 	// Set context for GLEW to use
-	glfwMakeContextCurrent(mainWindow);	// TODO: Apparently its possible to draw to different windows - perhaps method for the different puzzle platforms/characters?? Switching Window Context 
+	glfwMakeContextCurrent(mainWindow);	
+	// TODO: ^^ Apparently its possible to draw to different windows - perhaps method for the different puzzle platforms/characters?? Switching Window Context 
+	// TODO: ^^ 6/08/2020 - Geometry Shader might be the better option to render each level/"dimension" . . .
 
 	// Allow modern extension features
 	glewExperimental = GL_TRUE;
@@ -43,11 +52,16 @@ bool Game::Initialize()
 		return false;
 	}
 
-	// Setup Viewport Size
-	glViewport(0, 0, bufferWidth, bufferHeight);
+	glEnable(GL_DEPTH_TEST);
 
-	CreateTriangle();
-	CompileShaders();
+	// Setup Viewport Size
+	glViewport(0, 0, m_BufferWidth, m_BufferHeight);
+
+	CreateMesh();
+	CreateMesh();
+	CreateShader();
+
+	proj = glm::perspective(45.0f, (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
 
 	return true;
 }
@@ -60,130 +74,87 @@ void Game::HandleInput()
 	glfwPollEvents();
 }
 
-GLuint VAO, VBO, Shader;
-
-// Vertex Shader
-static const char* vShader = 
-R"(		     
-		#version 460						     
-									     
-		layout (location = 0) in vec3 pos;	     
-									     
-		void main() 
-		{						     
-			gl_Position = vec4(0.4f * pos, 1.0f);
-		}
-)";
-
-// Fragment Shader
-static const char* fShader = 
-R"(		 
-		#version 460						 
-									 
-		layout (location = 0) out vec4 color;						 
-									 
-		void main() 
-		{						 
-			color = vec4(0.0, 1.0, 0.0, 1.0);
-		}
-)";
-
-void Game::CreateTriangle() 
+void Game::CreateMesh()
 {
-	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 0.0f,  1.0f, 0.0f
+	unsigned int indices[] = {
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
 	};
 
-	// Generate and Bind Vertex Array Object(s)
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	GLfloat vertices[] = {
+		-1.0f, -1.0f, 0.0f,
+		 0.0f, -1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f,
+		 0.0f,  1.0f, 0.0f,
+	};
 
-	// Generate and Bind Vertex Buffer Object(s)
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	// Unbinding Vertex Buffer Object(s)
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// Unbinding Vertex Array Object(s)
-	glBindVertexArray(0);
+	MeshRenderer *obj = new MeshRenderer();
+	obj->CreateMesh(vertices, indices, 12, 12);
+	m_MeshList.push_back(obj);
 }
 
-void Game::AddShader(const GLuint& program, const char* shaderCode, GLenum shaderType) {
-	GLuint created_shader = glCreateShader(shaderType);
-
-	const GLchar* code[1];
-	code[0] = shaderCode;
-
-	GLint code_length[1];
-	code_length[0] = strlen(shaderCode);
-
-	glShaderSource(created_shader, 1, code, code_length);
-	glCompileShader(created_shader);
-
-	GLint result = 0;
-	GLchar eLog[1024] = { 0 };
-
-	glGetShaderiv(created_shader, GL_COMPILE_STATUS, &result);
-	if (!result) {
-		glGetProgramInfoLog(created_shader, sizeof(eLog), nullptr, eLog);
-		printf("Error compiling the %d shader: '%s'\n", shaderType, eLog);
-		return;
-	}
-
-	glAttachShader(program, created_shader);
+void Game::CreateShader() {
+	Shader *shader = new Shader();
+	shader->CreateFromFiles("Shaders/shader.vert", "Shaders/shader.frag");
+	m_ShaderList.push_back(shader);
 }
 
-void Game::CompileShaders() {
-	Shader = glCreateProgram();
 
-	if (!Shader) {
-		printf("Error creating shader program!\n");
-		return;
+// Temporary Variables to move some pyramid meshes 
+bool direction = true;
+bool sizeDirection = true;
+float currAngle = 0.0f;
+float currSize = 0.4f;
+float triOffset = 0.0f;
+float triMaxOffset = 0.7f;
+float triIncrement = 0.005f;
+
+void Game::Update() 
+{ 
+	if (direction) {
+		triOffset += triIncrement;
+	} else {
+		triOffset -= triIncrement;
 	}
 
-	AddShader(Shader, vShader, GL_VERTEX_SHADER);
-	AddShader(Shader, fShader, GL_FRAGMENT_SHADER);
-
-	GLint result = 0;
-	GLchar eLog[1024] = { 0 };
-
-	glLinkProgram(Shader);
-	glGetProgramiv(Shader, GL_LINK_STATUS, &result);
-	if (!result) {
-		glGetProgramInfoLog(Shader, sizeof(eLog), nullptr, eLog);
-		printf("Error linking program: '%s'\n", eLog);
-		return;
+	if (std::abs(triOffset) >= triMaxOffset) {
+		direction = !direction;
 	}
 
-	glValidateProgram(Shader);
-	glGetProgramiv(Shader, GL_VALIDATE_STATUS, &result);
-	if (!result) {
-		glGetProgramInfoLog(Shader, sizeof(eLog), nullptr, eLog);
-		printf("Error validating program: '%s'\n", eLog);
-		return;
+	currAngle += 0.5f;
+	if (currAngle >= 360) {
+		currAngle -= 360;
 	}
 }
-
-void Game::Update() { }
 
 void Game::Render()
 {
 	// Clear window
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(Shader);
+	m_ShaderList[0]->UseShader();
 
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glBindVertexArray(0);
+	GLuint uniformModel = 0, uniformProj = 0;
+	uniformModel = m_ShaderList[0]->GetModelLocation();
+	uniformProj = m_ShaderList[0]->GetProjectionLocation();
+
+	glm::mat4 model(1.0f); // Identity 4x4 Matrix
+	model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f));
+	model = glm::rotate(model, glm::radians(currAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(currSize, currSize, 1.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));  // Uniform Value Setting
+	glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
+	m_MeshList[0]->Render();
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(triOffset, 0.0f, -2.5f));
+	model = glm::rotate(model, glm::radians(currAngle), glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(currSize + 0.2f, currSize + 0.2f, 1.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));  // Uniform Value Setting
+	m_MeshList[1]->Render();
 
 	glUseProgram(0);
 
