@@ -1,6 +1,7 @@
 #include <iostream>
-#include "Src/Game.h"
-#include "Src/Constants.h"
+#include "Game.h"
+#include "Constants.h"
+#include "Light.h"
 
 int main(int argc, char *args[]) {
 	Game* game = new Game();

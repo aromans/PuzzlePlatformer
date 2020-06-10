@@ -4,6 +4,8 @@
 #include "MeshRenderer.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Texture.h"
+#include "Light.h"
 
 #include <GLFW\glfw3.h>
 #include <glm\glm.hpp>
@@ -27,6 +29,9 @@ public:
 	void HandleInput(double deltaTime);
 	void Update();		
 	void Render();
+
+	void CalculateAverageNormals(unsigned int* indices, unsigned int indexCount, GLfloat* vertices,
+		unsigned int vertexCount, unsigned int vLength, unsigned int normalOffset);
 
 	void CreateMesh();
 	void CreateShader();
@@ -63,6 +68,11 @@ private:
 
 	bool m_IsRunning;
 	glm::mat4 proj;
+
+	Texture m_BrickTexture;
+	Texture m_DirtTexture;
+
+	Light m_Light;
 
 	std::vector<MeshRenderer*> m_MeshList;
 	std::vector<Shader*> m_ShaderList;

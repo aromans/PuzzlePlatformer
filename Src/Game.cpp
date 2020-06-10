@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "Game.h"
 
 #include <stdio.h>
@@ -76,6 +78,15 @@ bool Game::Initialize()
 
 	m_MainCamera = Camera(glm::vec3(0.0f, 0.0f, -4.0f), glm::vec3(0.0f, 1.0f, 0.0f), 90.0f, 0.0f, 5.0f, 0.5f);
 
+	m_BrickTexture = Texture("Textures/brick.png");
+	m_BrickTexture.LoadTexture();
+
+	m_DirtTexture = Texture("Textures/dirt.png");
+	m_DirtTexture.LoadTexture();
+
+	m_Light = Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f,		// Ambient
+					glm::vec3(2.0f, -1.0f, -2.0f), 1.0f);   // Diffuse
+
 	proj = glm::perspective(45.0f, (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
 
 	return true;
@@ -130,8 +141,34 @@ void Game::HandleMouse(GLFWwindow* window, double xPos, double yPos)
 
 	theGame->ChangedPos = std::make_pair(xPos - theGame->LastPos.first, theGame->LastPos.second - yPos);
 	theGame->LastPos = std::make_pair(xPos, yPos);
+}
 
-	printf("x:%.6f, y:%.6f\n", theGame->ChangedPos.first, theGame->ChangedPos.second);
+void Game::CalculateAverageNormals(unsigned int* indices, unsigned int indexCount, GLfloat* vertices, 
+								   unsigned int vertexCount, unsigned int vLength, unsigned int normalOffset) 
+{
+	for (size_t i = 0; i < indexCount; i += 3) 
+	{
+		unsigned int in0 = indices[i] * vLength;
+		unsigned int in1 = indices[i + 1] * vLength;
+		unsigned int in2 = indices[i + 2] * vLength;
+
+		glm::vec3 v1(vertices[in1] - vertices[in0], vertices[in1 + 1] - vertices[in0 + 1], vertices[in1 + 2] - vertices[in0 + 2]);
+		glm::vec3 v2(vertices[in2] - vertices[in0], vertices[in2 + 1] - vertices[in0 + 1], vertices[in2 + 2] - vertices[in0 + 2]);
+		glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+
+		in0 += normalOffset; in1 += normalOffset; in2 += normalOffset;
+		vertices[in0] = normal.x; vertices[in0 + 1] = normal.y; vertices[in0 + 2] = normal.z;
+		vertices[in1] = normal.x; vertices[in1 + 1] = normal.y; vertices[in1 + 2] = normal.z;
+		vertices[in2] = normal.x; vertices[in2 + 1] = normal.y; vertices[in2 + 2] = normal.z;
+	}
+
+	for (size_t i = 0; i < vertexCount/vLength; ++i) 
+	{
+		unsigned int nOffset = i * vLength + normalOffset;
+		glm::vec3 vec(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
+		vec = glm::normalize(vec);
+		vertices[nOffset] = vec.x; vertices[nOffset + 1] = vec.y; vertices[nOffset + 2] = vec.z;
+	}
 }
 
 void Game::CreateMesh()
@@ -143,21 +180,24 @@ void Game::CreateMesh()
 		0, 1, 2
 	};
 
+	// Values:
+	// x, y, z | u, v | Normals [x,y,z] (averaged)
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		 0.0f, -1.0f, 1.0f,
-		 1.0f, -1.0f, 0.0f,
-		 0.0f,  1.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 0.0f, 0.0f,
+		 0.0f, -1.0f, 1.0f,  0.5f, 0.0f,  0.0f, 0.0f, 0.0f,
+ 		 1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  0.0f, 0.0f, 0.0f,
+		 0.0f,  1.0f, 0.0f,  0.5f, 1.0f,  0.0f, 0.0f, 0.0f
 	};
 
+	CalculateAverageNormals(indices, 12, vertices, 32, 8, 5);
+
 	MeshRenderer *obj = new MeshRenderer();
-	obj->CreateMesh(vertices, indices, 12, 12);
+	obj->CreateMesh(vertices, indices, 32, 12);
 	m_MeshList.push_back(obj);
 }
 
 void Game::CreateShader() {
-	Shader *shader = new Shader();
-	shader->CreateFromFiles("Shaders/shader.vert", "Shaders/shader.frag");
+	Shader *shader = new Shader("Shaders/vShader.glsl", "Shaders/fShader.glsl");
 	m_ShaderList.push_back(shader);
 }
 
@@ -195,27 +235,48 @@ void Game::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_ShaderList[0]->UseShader();
+	Shader* shader = m_ShaderList[0];
+	//m_ShaderList[0]->Use();
 
-	GLuint uniformModel = 0, uniformProj = 0, uniformView = 0;
-	uniformModel = m_ShaderList[0]->GetModelLocation();
-	uniformProj = m_ShaderList[0]->GetProjectionLocation();
-	uniformView = m_ShaderList[0]->GetViewLocation();
+	//GLuint uniformModel = 0, uniformProj = 0, uniformView = 0;
+	//uniformModel = m_ShaderList[0]->GetModelLocation();
+	//uniformProj = m_ShaderList[0]->GetProjectionLocation();
+	//uniformView = m_ShaderList[0]->GetViewLocation();
+
+	//GLuint uniformColor = m_ShaderList[0]->GetColorLocation();
+	//GLuint uniformAmbientIntensity = m_ShaderList[0]->GetIntensityLocation();
+
+	//GLuint uniformDirection = m_ShaderList[0]->GetDirectionLocation();
+	//GLuint uniformDiffuseIntensity = m_ShaderList[0]->GetDiffuseIntensityLocation();
+
+	m_Light.UseLight(*shader);
 
 	glm::mat4 model(1.0f); // Identity 4x4 Matrix
-	model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f));
-	model = glm::rotate(model, glm::radians(currAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+	model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(currSize, currSize, 1.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));  // Uniform Value Setting
-	glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
-	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(m_MainCamera.CalculateViewMatrix()));
+
+	shader->SetMat4f(model, "model");
+	shader->SetMat4f(proj, "projection");
+	shader->SetMat4f(m_MainCamera.CalculateViewMatrix(), "view");
+
+	m_BrickTexture.UseTexture();
+
+	shader->Use();
+
 	m_MeshList[0]->Render();
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(triOffset, 0.0f, -2.5f));
-	model = glm::rotate(model, glm::radians(currAngle), glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f));
+	model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(currSize + 0.2f, currSize + 0.2f, 1.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));  // Uniform Value Setting
+
+	shader->SetMat4f(model, "model");
+
+	m_DirtTexture.UseTexture();
+
+	shader->Use();
+
 	m_MeshList[1]->Render();
 
 	glUseProgram(0);
