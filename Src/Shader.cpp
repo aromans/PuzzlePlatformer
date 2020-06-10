@@ -1,83 +1,113 @@
 #include "Shader.h"
 
-Shader::Shader() : m_ShaderID(0), m_UniformModel(0), m_UniformProjection(0), m_UniformView(0) { }
+#pragma region Public Methods
 
-Shader::~Shader() { Clear(); }
+void Shader::Use() { glUseProgram(this->m_ShaderID); }
 
-void Shader::CreateFromString(const char* vertex_code, const char* fragment_code)
+void Shader::Unuse() { glUseProgram(0); }
+
+void Shader::Set1i(GLint value, const GLchar* name)
 {
-	CompileShader(vertex_code, fragment_code);
+	this->Use();
+
+	glUniform1i(glGetUniformLocation(this->m_ShaderID, name), value);
+
+	this->Unuse();
 }
 
-void Shader::CreateFromFiles(const char* vertex_path, const char* fragment_path) 
+void Shader::Set1f(GLfloat value, const GLchar* name)
 {
-	std::string vertex_shader = ReadFile(vertex_path);
-	std::string fragment_shader = ReadFile(fragment_path);
-	CompileShader(vertex_shader.c_str(), fragment_shader.c_str());
+	this->Use();
+
+	glUniform1f(glGetUniformLocation(this->m_ShaderID, name), value);
+
+	this->Unuse();
 }
 
-std::string Shader::ReadFile(const char* path) 
+void Shader::SetVec2f(glm::vec2 value, const GLchar* name)
 {
-	std::string line{""};
-	std::string content{""};
+	this->Use();
+
+	glUniform2fv(glGetUniformLocation(this->m_ShaderID, name), 1, glm::value_ptr(value));
+
+	this->Unuse();
+}
+
+void Shader::SetVec3f(glm::vec2 value, const GLchar* name)
+{
+	this->Use();
+
+	glUniform3fv(glGetUniformLocation(this->m_ShaderID, name), 1, glm::value_ptr(value));
+
+	this->Unuse();
+}
+
+void Shader::SetVec4f(glm::vec2 value, const GLchar* name)
+{
+
+	this->Use();
+
+	glUniform4fv(glGetUniformLocation(this->m_ShaderID, name), 1, glm::value_ptr(value));
+
+	this->Unuse();
+}
+
+void Shader::SetMat3f(glm::mat3 value, const GLchar* name)
+{
+	this->Use();
+
+	glUniformMatrix3fv(glGetUniformLocation(this->m_ShaderID, name), 1, GL_FALSE, glm::value_ptr(value));
+
+	this->Unuse();
+}
+
+void Shader::SetMat4f(glm::mat4 value, const GLchar* name)
+{
+	this->Use();
+
+	glUniformMatrix4fv(glGetUniformLocation(this->m_ShaderID, name), 1, GL_FALSE, glm::value_ptr(value));
+
+	this->Unuse();
+}
+
+#pragma endregion
+
+#pragma region Private Methods
+
+std::string Shader::ReadFile(const char* path)
+{
+	std::string line{ "" };
+	std::string content{ "" };
 	std::ifstream filestream(path);
 
 	if (filestream.is_open()) {
 		while (std::getline(filestream, line)) {
 			content.append(line + "\n");
 		}
-	} else {
-		printf("Error loading from the path '%s'!", path);
+	}
+	else {
+		printf("ERROR: Error loading from the path '%s'!", path);
 	}
 
 	filestream.close();
 	return content;
 }
 
-GLuint Shader::GetProjectionLocation()
-{
-	return m_UniformProjection;
-}
-
-GLuint Shader::GetModelLocation()
-{
-	return m_UniformModel;
-}
-
-GLuint Shader::GetViewLocation()
-{
-	return m_UniformView;
-}
-
-void Shader::UseShader()
-{
-	// TODO: Print Warning if ShaderID is 0 -> No Shader being used!
-	glUseProgram(m_ShaderID);
-}
-
-void Shader::Clear()
-{
-	if (m_ShaderID != 0) {
-		glDeleteProgram(m_ShaderID);
-		m_ShaderID = 0;
-	}
-
-	m_UniformModel = 0;
-	m_UniformProjection = 0;
-	m_UniformView = 0;
-}
-
-void Shader::CompileShader(const char* vertex_code, const char* fragment_code)
+void Shader::CompileShader(GLuint vertexid, GLuint fragmentId, GLuint geometryId)
 {
 	m_ShaderID = glCreateProgram();
 
 	if (!m_ShaderID) {
-		printf("Error creating shader program!\n");
+		printf("ERROR: Error creating shader program!\n");
 		return;
 	}
 
-	AddShader(m_ShaderID, vertex_code, GL_VERTEX_SHADER);
-	AddShader(m_ShaderID, fragment_code, GL_FRAGMENT_SHADER);
+	glAttachShader(this->m_ShaderID, vertexid);
+
+	if (geometryId)
+		glAttachShader(this->m_ShaderID, geometryId);
+
+	glAttachShader(this->m_ShaderID, fragmentId);
 
 	GLint result = 0;
 	GLchar eLog[1024] = { 0 };
@@ -86,7 +116,7 @@ void Shader::CompileShader(const char* vertex_code, const char* fragment_code)
 	glGetProgramiv(m_ShaderID, GL_LINK_STATUS, &result);
 	if (!result) {
 		glGetProgramInfoLog(m_ShaderID, sizeof(eLog), nullptr, eLog);
-		printf("Error linking program: '%s'\n", eLog);
+		printf("ERROR: Error linking program: '%s'\n", eLog);
 		return;
 	}
 
@@ -94,38 +124,30 @@ void Shader::CompileShader(const char* vertex_code, const char* fragment_code)
 	glGetProgramiv(m_ShaderID, GL_VALIDATE_STATUS, &result);
 	if (!result) {
 		glGetProgramInfoLog(m_ShaderID, sizeof(eLog), nullptr, eLog);
-		printf("Error validating program: '%s'\n", eLog);
+		printf("ERROR: Error validating program: '%s'\n", eLog);
 		return;
 	}
 
-	// Uniform Introduction
-	m_UniformModel = glGetUniformLocation(m_ShaderID, "model");
-	m_UniformProjection = glGetUniformLocation(m_ShaderID, "projection");
-	m_UniformView = glGetUniformLocation(m_ShaderID, "view");
+	glUseProgram(0);
 }
 
-void Shader::AddShader(const GLuint& program, const char* shaderCode, GLenum shaderType)
+GLuint Shader::AddShader(const GLchar* shaderCode, GLenum shaderType)
 {
-	GLuint created_shader = glCreateShader(shaderType);
-
-	const GLchar* code[1];
-	code[0] = shaderCode;
-
-	GLint code_length[1];
-	code_length[0] = strlen(shaderCode);
-
-	glShaderSource(created_shader, 1, code, code_length);
-	glCompileShader(created_shader);
-
 	GLint result = 0;
 	GLchar eLog[1024] = { 0 };
 
-	glGetShaderiv(created_shader, GL_COMPILE_STATUS, &result);
+	GLuint shader = glCreateShader(shaderType);
+
+	glShaderSource(shader, 1, &shaderCode, NULL);
+	glCompileShader(shader);
+
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 	if (!result) {
-		glGetProgramInfoLog(created_shader, sizeof(eLog), nullptr, eLog);
-		printf("Error compiling the %d shader: '%s'\n", shaderType, eLog);
-		return;
+		glGetProgramInfoLog(shader, sizeof(eLog), nullptr, eLog);
+		printf("ERROR: Error compiling the %d shader: '%s'\n", shaderType, eLog);
 	}
 
-	glAttachShader(program, created_shader);
+	return shader;
 }
+
+#pragma endregion
