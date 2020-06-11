@@ -74,11 +74,19 @@ bool Game::Initialize()
 	// Assigns this window for listening to user input
 	glfwSetWindowUserPointer(m_MainWindow, this);
 
+	// Calculate Projection Matrix
+	proj = glm::perspective(glm::radians(45.0f), (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
+
+	return true;
+}
+
+void Game::Start() 
+{
 	// Mesh & Shader Initialization
 	m_MeshList.push_back(CreateMesh());	 // Pyramid 1
 	m_MeshList.push_back(CreateMesh());	 // Pyramid 2
 	m_MeshList.push_back(CreateFloor()); // Floor
-	CreateShader(); 
+	CreateShader();
 
 	// Camera Initialization
 	m_MainCamera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
@@ -101,14 +109,7 @@ bool Game::Initialize()
 
 	// Material (Specular)
 	m_MaterialOne = Material(glm::vec3(1.0f));
-
-	// Calculate Projection Matrix
-	proj = glm::perspective(glm::radians(45.0f), (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
-
-	return true;
 }
-
-void Game::Start() { }
 
 void Game::HandleInput(double deltaTime)
 {
