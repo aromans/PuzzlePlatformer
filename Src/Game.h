@@ -5,7 +5,9 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Texture.h"
-#include "Light.h"
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "Material.h"
 
 #include <GLFW\glfw3.h>
 #include <glm\glm.hpp>
@@ -33,7 +35,8 @@ public:
 	void CalculateAverageNormals(unsigned int* indices, unsigned int indexCount, GLfloat* vertices,
 		unsigned int vertexCount, unsigned int vLength, unsigned int normalOffset);
 
-	void CreateMesh();
+	MeshRenderer* CreateMesh();
+	MeshRenderer* CreateFloor();
 	void CreateShader();
 
 	bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindow); }
@@ -72,7 +75,10 @@ private:
 	Texture m_BrickTexture;
 	Texture m_DirtTexture;
 
-	Light m_Light;
+	DirectionalLight m_Light;
+	std::vector<PointLight> m_PointLights;
+
+	Material m_MaterialOne;
 
 	std::vector<MeshRenderer*> m_MeshList;
 	std::vector<Shader*> m_ShaderList;

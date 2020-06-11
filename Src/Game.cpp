@@ -16,6 +16,8 @@ Game::~Game()
 	}
 }
 
+glm::vec3 direction_of_light = glm::vec3(0.0f, 0.0f, -1.0f);
+
 bool Game::Initialize()
 {
 	// Initialize GLFW
@@ -72,22 +74,36 @@ bool Game::Initialize()
 	// Assigns this window for listening to user input
 	glfwSetWindowUserPointer(m_MainWindow, this);
 
-	CreateMesh();
-	CreateMesh();
+	// Mesh & Shader Initialization
+	m_MeshList.push_back(CreateMesh());	 // Pyramid 1
+	m_MeshList.push_back(CreateMesh());	 // Pyramid 2
+	m_MeshList.push_back(CreateFloor()); // Floor
 	CreateShader(); 
 
-	m_MainCamera = Camera(glm::vec3(0.0f, 0.0f, -4.0f), glm::vec3(0.0f, 1.0f, 0.0f), 90.0f, 0.0f, 5.0f, 0.5f);
+	// Camera Initialization
+	m_MainCamera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
 
+	// Texture Initialization
 	m_BrickTexture = Texture("Textures/brick.png");
 	m_BrickTexture.LoadTexture();
 
 	m_DirtTexture = Texture("Textures/dirt.png");
 	m_DirtTexture.LoadTexture();
 
-	m_Light = Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f,		// Ambient
-					glm::vec3(2.0f, -1.0f, -2.0f), 1.0f);   // Diffuse
+	// Directional Light
+	m_Light = DirectionalLight(direction_of_light, glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.3f);
 
-	proj = glm::perspective(45.0f, (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
+	// Point Lights
+	PointLight p1 = PointLight(glm::vec3(-4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 1.0f);
+	PointLight p2 = PointLight(glm::vec3(4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 0.0f, 1.0f), 0.4f, 0.8f);
+	m_PointLights.push_back(p1);
+	m_PointLights.push_back(p2);
+
+	// Material (Specular)
+	m_MaterialOne = Material(glm::vec3(1.0f));
+
+	// Calculate Projection Matrix
+	proj = glm::perspective(glm::radians(45.0f), (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
 
 	return true;
 }
@@ -154,12 +170,13 @@ void Game::CalculateAverageNormals(unsigned int* indices, unsigned int indexCoun
 
 		glm::vec3 v1(vertices[in1] - vertices[in0], vertices[in1 + 1] - vertices[in0 + 1], vertices[in1 + 2] - vertices[in0 + 2]);
 		glm::vec3 v2(vertices[in2] - vertices[in0], vertices[in2 + 1] - vertices[in0 + 1], vertices[in2 + 2] - vertices[in0 + 2]);
-		glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
 
 		in0 += normalOffset; in1 += normalOffset; in2 += normalOffset;
-		vertices[in0] = normal.x; vertices[in0 + 1] = normal.y; vertices[in0 + 2] = normal.z;
-		vertices[in1] = normal.x; vertices[in1 + 1] = normal.y; vertices[in1 + 2] = normal.z;
-		vertices[in2] = normal.x; vertices[in2 + 1] = normal.y; vertices[in2 + 2] = normal.z;
+		vertices[in0] += normal.x; vertices[in0 + 1] += normal.y; vertices[in0 + 2] += normal.z;
+		vertices[in1] += normal.x; vertices[in1 + 1] += normal.y; vertices[in1 + 2] += normal.z;
+		vertices[in2] += normal.x; vertices[in2 + 1] += normal.y; vertices[in2 + 2] += normal.z;
 	}
 
 	for (size_t i = 0; i < vertexCount/vLength; ++i) 
@@ -171,7 +188,7 @@ void Game::CalculateAverageNormals(unsigned int* indices, unsigned int indexCoun
 	}
 }
 
-void Game::CreateMesh()
+MeshRenderer* Game::CreateMesh()
 {
 	unsigned int indices[] = {
 		0, 3, 1,
@@ -180,20 +197,40 @@ void Game::CreateMesh()
 		0, 1, 2
 	};
 
-	// Values:
-	// x, y, z | u, v | Normals [x,y,z] (averaged)
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 0.0f, 0.0f,
-		 0.0f, -1.0f, 1.0f,  0.5f, 0.0f,  0.0f, 0.0f, 0.0f,
- 		 1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  0.0f, 0.0f, 0.0f,
-		 0.0f,  1.0f, 0.0f,  0.5f, 1.0f,  0.0f, 0.0f, 0.0f
+		//	x      y      z			u	  v			nx	  ny    nz
+			-1.0f, -1.0f, -0.6f,		0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 1.0f,		0.5f, 0.0f,		0.0f, 0.0f, 0.0f,
+			1.0f, -1.0f, -0.6f,		1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f
 	};
 
 	CalculateAverageNormals(indices, 12, vertices, 32, 8, 5);
 
 	MeshRenderer *obj = new MeshRenderer();
 	obj->CreateMesh(vertices, indices, 32, 12);
-	m_MeshList.push_back(obj);
+	//m_MeshList.push_back(obj);
+	return obj;
+}
+
+MeshRenderer* Game::CreateFloor()
+{
+	unsigned int floorIndices[] = {
+		0, 2, 1,
+		1, 2, 3
+	};
+
+	GLfloat floorVertices[] = {
+		-10.0f, 0.0f, -10.0f,	 0.0f,  0.0f,	0.0f, -1.0f, 0.0f,
+		 10.0f, 0.0f, -10.0f,   10.0f,  0.0f,	0.0f, -1.0f, 0.0f,
+		-10.0f, 0.0f,  10.0f,	 0.0f, 10.0f,	0.0f, -1.0f, 0.0f,
+		 10.0f, 0.0f,  10.0f,	10.0f, 10.0f,	0.0f, -1.0f, 0.0f
+	};
+
+	MeshRenderer* floor = new MeshRenderer();
+	floor->CreateMesh(floorVertices, floorIndices, 32, 6);
+	//m_MeshList.push_back(floor);
+	return floor;
 }
 
 void Game::CreateShader() {
@@ -236,48 +273,54 @@ void Game::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Shader* shader = m_ShaderList[0];
-	//m_ShaderList[0]->Use();
 
-	//GLuint uniformModel = 0, uniformProj = 0, uniformView = 0;
-	//uniformModel = m_ShaderList[0]->GetModelLocation();
-	//uniformProj = m_ShaderList[0]->GetProjectionLocation();
-	//uniformView = m_ShaderList[0]->GetViewLocation();
+	shader->Set1i(m_PointLights.size(), "pointLightCount");
 
-	//GLuint uniformColor = m_ShaderList[0]->GetColorLocation();
-	//GLuint uniformAmbientIntensity = m_ShaderList[0]->GetIntensityLocation();
+	m_Light.SendToShader(*shader);
 
-	//GLuint uniformDirection = m_ShaderList[0]->GetDirectionLocation();
-	//GLuint uniformDiffuseIntensity = m_ShaderList[0]->GetDiffuseIntensityLocation();
+	for (int i = 0; i < m_PointLights.size(); ++i) {
+		m_PointLights[i].SendToShader(*shader, i);
+	}
 
-	m_Light.UseLight(*shader);
-
-	glm::mat4 model(1.0f); // Identity 4x4 Matrix
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
-	model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(currSize, currSize, 1.0f));
-
-	shader->SetMat4f(model, "model");
+	m_MaterialOne.SendToShader(*shader);
 	shader->SetMat4f(proj, "projection");
 	shader->SetMat4f(m_MainCamera.CalculateViewMatrix(), "view");
+	shader->SetVec3f(m_MainCamera.GetPosition(), "cameraPos");
 
+	// Brick Pyramid
+	glm::mat4 model(1.0f); // Identity 4x4 Matrix
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+	//model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//model = glm::scale(model, glm::vec3(currSize, currSize, 1.0f));
+	glm::mat4 transposedInverse = glm::transpose(glm::inverse(model));	// Its expensive doing this on the GPU, 
+																		// so we do it on the CPU and pass it to the GPU
+	shader->SetMat4f(model, "model");
+	shader->SetMat4f(transposedInverse, "inverseTModel");
 	m_BrickTexture.UseTexture();
-
 	shader->Use();
-
 	m_MeshList[0]->Render();
 
+	// Dirt Pyramid
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f));
-	model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(currSize + 0.2f, currSize + 0.2f, 1.0f));
-
+	model = glm::translate(model, glm::vec3(0.0f, 4.0f, -2.5f));
+	//model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	//model = glm::scale(model, glm::vec3(currSize + 0.2f, currSize + 0.2f, 1.0f));
+	transposedInverse = glm::transpose(glm::inverse(model));
 	shader->SetMat4f(model, "model");
-
+	shader->SetMat4f(transposedInverse, "inverseTModel");
 	m_DirtTexture.UseTexture();
-
 	shader->Use();
-
 	m_MeshList[1]->Render();
+
+	// Floor Model
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+	transposedInverse = glm::transpose(glm::inverse(model));
+	shader->SetMat4f(model, "model");
+	shader->SetMat4f(transposedInverse, "inverseTModel");
+	m_DirtTexture.UseTexture();
+	shader->Use();
+	m_MeshList[2]->Render();
 
 	glUseProgram(0);
 
