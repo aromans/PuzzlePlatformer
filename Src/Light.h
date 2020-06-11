@@ -10,27 +10,21 @@ public:
 	Light() { 
 		m_Color = glm::vec3(1.0f, 1.0f, 1.0f); 
 		m_AmbientIntensity = 1.0f; 
-		m_Direction = glm::vec3(0.0f, -1.0f, 0.0f);
-		m_DiffuseIntensity = 0.0f;
+		m_DiffuseIntensity = 1.0f;
 	}
 
-	Light(glm::vec3 ambientColor, GLfloat ambientIntesnity, glm::vec3 direction, GLfloat diffuseIntensity) {
+	Light(glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) {
 		m_Color = ambientColor;
 		m_AmbientIntensity = ambientIntesnity;
-		m_Direction = direction;
 		m_DiffuseIntensity = diffuseIntensity;
 	}
 
 	~Light() {}
 
-	void UseLight(Shader& shader);
+	virtual void SendToShader(Shader& shader) = 0;
 
-private:
-	// Ambient
+protected:
 	glm::vec3 m_Color;
 	GLfloat m_AmbientIntensity;
-
-	//Diffuse
-	glm::vec3 m_Direction;
 	GLfloat m_DiffuseIntensity;
 };
