@@ -28,8 +28,8 @@ public:
 
 	bool Initialize();	// The Game Engine's Awake
 	void Start();		// The Game Engine's Start
-	void HandleInput(double deltaTime);
-	void Update();		
+	void HandleInput();
+	void Update(double dt);		
 	void Render();
 
 	void CalculateAverageNormals(unsigned int* indices, unsigned int indexCount, GLfloat* vertices,

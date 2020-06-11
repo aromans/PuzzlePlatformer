@@ -111,14 +111,10 @@ void Game::Start()
 	m_MaterialOne = Material(glm::vec3(1.0f));
 }
 
-void Game::HandleInput(double deltaTime)
+void Game::HandleInput()
 {
 	// Get + Handle user input events
 	glfwPollEvents();
-
-	// Camera Controls 
-	m_MainCamera.Move(Keys, deltaTime);
-	m_MainCamera.Rotate(GetChangedPos());
 }
 
 
@@ -239,32 +235,11 @@ void Game::CreateShader() {
 	m_ShaderList.push_back(shader);
 }
 
-
-// Temporary Variables to move some pyramid meshes 
-bool direction = true;
-bool sizeDirection = true;
-float currAngle = 0.0f;
-float currSize = 0.4f;
-float triOffset = 0.0f;
-float triMaxOffset = 0.7f;
-float triIncrement = 0.005f;
-
-void Game::Update() 
+void Game::Update(double dt) 
 { 
-	if (direction) {
-		triOffset += triIncrement;
-	} else {
-		triOffset -= triIncrement;
-	}
-
-	if (std::abs(triOffset) >= triMaxOffset) {
-		direction = !direction;
-	}
-
-	currAngle += 0.5f;
-	if (currAngle >= 360) {
-		currAngle -= 360;
-	}
+	// Camera Controls 
+	m_MainCamera.Move(Keys, dt);
+	m_MainCamera.Rotate(GetChangedPos());
 }
 
 void Game::Render()

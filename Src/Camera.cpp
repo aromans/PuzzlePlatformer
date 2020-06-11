@@ -49,6 +49,13 @@ void Camera::Move(bool* keys, GLfloat deltaTime)
 	if (keys[GLFW_KEY_A]) {
 		m_Position -= m_Right * m_MovementSpeed * deltaTime;
 	}
+
+	if (keys[GLFW_KEY_UP]) {
+		m_MovementSpeed++;
+	}
+	else if (keys[GLFW_KEY_DOWN]) {
+		m_MovementSpeed--;
+	}
 }
 
 // TODO: Mouse Sensitivity is REALLY high - should refactor and improve upon later . . .

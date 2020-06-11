@@ -27,8 +27,8 @@ int main(int argc, char *args[]) {
 		accumulator += frameTime;
 
 		while (accumulator >= dt) {
-			game->HandleInput(dt);
-			game->Update();
+			game->HandleInput();
+			game->Update(dt);
 			t += dt;
 			accumulator -= dt;
 		}
