@@ -19,6 +19,8 @@ public:
 	void Rotate(std::pair<GLfloat, GLfloat> rotation_delta);
 	glm::mat4 CalculateViewMatrix();
 
+	glm::vec3 GetPosition() const { return m_Position; }
+
 private:
 	void Update();
 

@@ -1,17 +1,20 @@
 #include "Camera.h"
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch, GLfloat move_speed, GLfloat turn_speed)
-	: m_Position(position), m_WorldUp(up), m_Yaw(yaw), m_Pitch(pitch), m_MovementSpeed(move_speed), m_TurnSpeed(turn_speed)
 {
+	m_Position = position;
+	m_WorldUp = up;
+	m_Yaw = yaw;
+	m_Pitch = pitch;
 	m_Front = glm::vec3(0.0f, 0.0f, -1.0f);
+
+	m_MovementSpeed = move_speed;
+	m_TurnSpeed = turn_speed;
 
 	Update();
 }
 
-Camera::Camera()
-{
-
-}
+Camera::Camera() { }
 
 Camera::~Camera()
 {
