@@ -99,6 +99,17 @@ vec4 CalcPointLights()
 
 	return totalColor;
 }
+
+float getFogFactor(float d) 
+{
+	const float max = 20.0;
+	const float min = 10.0;
+
+	if (d >= max) return 1;
+	if (d <= min) return 0;
+
+	return 1 - (max - d) / (max - min);
+}
 									 
 void main() 
 {
@@ -108,5 +119,20 @@ void main()
 	// Point Lights
 	finalColor += CalcPointLights();
 
+	float distance = distance(cameraPos, vPosition);// * 0.5f;
+	//float fogFactor = getFogFactor(distance);
+
+	vec3 rayOri = cameraPos;
+	vec3 rayDir = vPosition - cameraPos;
+
+	float c = 0.02;
+    float b = 0.01;
+
+	float fogFactor =  c*exp(-rayOri.y*b)*(1.0-exp(-distance*rayDir.y*b))/rayDir.y;
+
+	vec4 fogColor = vec4(0.3f, .37f, .44f, 1.f);
+
 	color = texture(theTexture, TexCoord) * finalColor;
+
+	color = mix(color, fogColor, fogFactor);
 }
