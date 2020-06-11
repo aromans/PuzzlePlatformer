@@ -33,7 +33,7 @@ void Shader::SetVec2f(glm::vec2 value, const GLchar* name)
 	this->Unuse();
 }
 
-void Shader::SetVec3f(glm::vec2 value, const GLchar* name)
+void Shader::SetVec3f(glm::vec3 value, const GLchar* name)
 {
 	this->Use();
 
@@ -42,7 +42,7 @@ void Shader::SetVec3f(glm::vec2 value, const GLchar* name)
 	this->Unuse();
 }
 
-void Shader::SetVec4f(glm::vec2 value, const GLchar* name)
+void Shader::SetVec4f(glm::vec4 value, const GLchar* name)
 {
 
 	this->Use();
