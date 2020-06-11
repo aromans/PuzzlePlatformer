@@ -7,6 +7,8 @@
 class Material
 {
 public:
+	Material() {}
+
 	Material(glm::vec3 specular)
 	{
 		this->m_Specular = specular;
@@ -14,7 +16,7 @@ public:
 
 	~Material() {}
 
-	void SendToShader(Shader& program);
+	void SendToShader(Shader& shader);
 
 private:
 	glm::vec3 m_Specular;
