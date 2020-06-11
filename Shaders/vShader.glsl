@@ -9,6 +9,8 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 vPosition;
 
+//out vec3 v_fogDepth;
+
 uniform mat4 model;
 uniform mat4 inverseTModel;
 uniform mat4 projection;
@@ -24,4 +26,7 @@ void main()
 	Normal = mat3(inverseTModel) * norm;
 
 	vPosition = (model * vec4(pos, 1.0)).xyz;
+
+	// Depth for SmoothStep Fog
+	//v_fogDepth = (view * vec4(pos, 1.0)).xyz;
 }

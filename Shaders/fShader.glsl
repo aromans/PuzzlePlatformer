@@ -4,6 +4,7 @@ in vec4 vColor;
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 vPosition;
+//in vec3 v_fogDepth;
 		 
 out vec4 color;
 
@@ -110,6 +111,9 @@ float getFogFactor(float d)
 
 	return 1 - (max - d) / (max - min);
 }
+
+const float fogNear = 8.f;
+const float fogFar = 14.f;
 									 
 void main() 
 {
@@ -119,11 +123,18 @@ void main()
 	// Point Lights
 	finalColor += CalcPointLights();
 
-	float distance = distance(cameraPos, vPosition) * 0.5f;
-	float fogFactor = getFogFactor(distance);
-	vec4 fogColor = vec4(0.3f, .37f, .44f, 1.f);
+	float distance = distance(cameraPos, vPosition);
+	
+	// -- Fog Stuff --
+	// Linear Fog
+	//float fogFactor = getFogFactor(distance);
+	// SmoothStep Fog w/ Near & Far
+	//float fogDepthAmnt = length(v_fogDepth);
+	//float fogFactor = smoothstep(fogNear, fogFar, fogDepthAmnt);
+	// Fog Color
+	//vec4 fogColor = vec4(0.3f, .37f, .44f, 1.f); // End -- Fog Stuff --
 
 	color = texture(theTexture, TexCoord) * finalColor;
 
-	color = mix(color, fogColor, fogFactor);
+	//color = mix(color, fogColor, fogFactor); // Uncomment to incorporate Fog
 }
