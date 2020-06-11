@@ -119,17 +119,8 @@ void main()
 	// Point Lights
 	finalColor += CalcPointLights();
 
-	float distance = distance(cameraPos, vPosition);// * 0.5f;
-	//float fogFactor = getFogFactor(distance);
-
-	vec3 rayOri = cameraPos;
-	vec3 rayDir = vPosition - cameraPos;
-
-	float c = 0.02;
-    float b = 0.01;
-
-	float fogFactor =  c*exp(-rayOri.y*b)*(1.0-exp(-distance*rayDir.y*b))/rayDir.y;
-
+	float distance = distance(cameraPos, vPosition) * 0.5f;
+	float fogFactor = getFogFactor(distance);
 	vec4 fogColor = vec4(0.3f, .37f, .44f, 1.f);
 
 	color = texture(theTexture, TexCoord) * finalColor;
