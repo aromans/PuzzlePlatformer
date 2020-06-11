@@ -7,8 +7,10 @@ layout (location = 2) in vec3 norm;
 out vec4 vColor;
 out vec2 TexCoord;
 out vec3 Normal;
+out vec3 vPosition;
 
 uniform mat4 model;
+uniform mat4 inverseTModel;
 uniform mat4 projection;
 uniform mat4 view;
 									     
@@ -19,5 +21,7 @@ void main()
 
 	TexCoord = tex;
 
-	Normal = mat3(transpose(inverse(model))) * norm;
+	Normal = mat3(inverseTModel) * norm;
+
+	vPosition = (model * vec4(pos, 1.0)).xyz;
 }
