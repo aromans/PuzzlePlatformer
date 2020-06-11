@@ -246,6 +246,7 @@ void Game::Render()
 {
 	// Clear window
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.3f, .37f, .44f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Shader* shader = m_ShaderList[0];

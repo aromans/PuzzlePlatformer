@@ -52,9 +52,13 @@ void Camera::Move(bool* keys, GLfloat deltaTime)
 
 	if (keys[GLFW_KEY_UP]) {
 		m_MovementSpeed++;
+
+		if (m_MovementSpeed >= 15.0f) m_MovementSpeed = 15.0f;
 	}
 	else if (keys[GLFW_KEY_DOWN]) {
 		m_MovementSpeed--;
+
+		if (m_MovementSpeed <= 0.0f) m_MovementSpeed = 0.0f;
 	}
 }
 
