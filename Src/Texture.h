@@ -11,7 +11,7 @@ public:
 	Texture(const char* path);
 	~Texture();
 
-	void LoadTexture();
+	bool LoadTexture(GLint param);
 	void UseTexture();
 	void Clear();
 
