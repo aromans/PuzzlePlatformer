@@ -7,13 +7,15 @@
 
 class Light {
 public:
-	Light() { 
+	Light() 
+	{ 
 		m_Color = glm::vec3(1.0f, 1.0f, 1.0f); 
 		m_AmbientIntensity = 1.0f; 
 		m_DiffuseIntensity = 1.0f;
 	}
 
-	Light(glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) {
+	Light(glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) 
+	{
 		m_Color = ambientColor;
 		m_AmbientIntensity = ambientIntesnity;
 		m_DiffuseIntensity = diffuseIntensity;

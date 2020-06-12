@@ -1,6 +1,6 @@
 #include "PointLight.h"
 
-PointLight::PointLight()
+PointLight::PointLight() : Light()
 {
 	m_Position = glm::vec3(0.0f);
 	m_Constant = 1.0f;
@@ -9,7 +9,7 @@ PointLight::PointLight()
 }
 
 PointLight::PointLight(glm::vec3 position, GLfloat con, GLfloat lin, GLfloat exp,
-					   glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) : Light(ambientColor, ambientIntesnity, diffuseIntensity)
+	glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) : Light(ambientColor, ambientIntesnity, diffuseIntensity)
 {
 	m_Position = position;
 	m_Constant = con;
@@ -19,7 +19,7 @@ PointLight::PointLight(glm::vec3 position, GLfloat con, GLfloat lin, GLfloat exp
 
 PointLight::~PointLight() { }
 
-void PointLight::SendToShader(Shader& shader, int i)
+void PointLight::SendToShader(Shader& shader, const int& i)
 {
 	std::string prefix = "pointLights[" + std::to_string(i) + "].";
 
@@ -30,7 +30,7 @@ void PointLight::SendToShader(Shader& shader, int i)
 	shader.Set1f(m_Exponent, (prefix + "exponent").c_str());
 
 	// Ambient && Diffuse Settings 
-	shader.SetVec3f(m_Color, (prefix + "base.color").c_str());
+	shader.SetVec3f(this->m_Color, (prefix + "base.color").c_str());
 	shader.Set1f(m_AmbientIntensity, (prefix + "base.ambientIntensity").c_str());
 	shader.Set1f(m_DiffuseIntensity, (prefix + "base.diffuseIntensity").c_str());
 }

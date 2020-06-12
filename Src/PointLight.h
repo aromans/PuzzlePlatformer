@@ -10,8 +10,8 @@ public:
 			   glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity);
 	~PointLight();
 
-	void SendToShader(Shader& shader) override;
-	void SendToShader(Shader& shader, int i);
+	virtual void SendToShader(Shader& shader, const int& i);
+	virtual void SendToShader(Shader& shader);
 
 protected:
 	glm::vec3 m_Position;
