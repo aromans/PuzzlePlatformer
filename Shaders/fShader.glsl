@@ -9,6 +9,7 @@ in vec3 vPosition;
 out vec4 color;
 
 const int MAX_POINT_LIGHTS = 5;
+const int MAX_SPOT_LIGHTS = 5;
 
 struct Light
 {
@@ -32,15 +33,24 @@ struct PointLight
 	float exponent;
 };
 
+struct SpotLight
+{
+	PointLight base;
+	vec3 direction;
+	float edge;
+};
+
 struct Material
 {
 	vec3 specular;
 };
 
 uniform int pointLightCount;
+uniform int spotLightCount;
 
 uniform DLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 uniform sampler2D theTexture;
 uniform Material  material;
@@ -76,26 +86,56 @@ vec4 CalcDirectionalLight()
 	return CalcLightByDirection(directionalLight.base, directionalLight.direction);
 }
 
+vec4 CalcPointLight(PointLight pLight)
+{
+	// Calculate the direction
+	vec3 direction = vPosition - pLight.position;
+	float distance = length(direction);
+
+	// Direction Vector Normalized
+	direction = normalize(direction);
+
+	vec4 color = CalcLightByDirection(pLight.base, direction);
+
+	// ax^2 + bx + c -> x being the distance
+	float attenuation = 1.0 / (pLight.exponent * distance * distance +
+							   pLight.linear * distance +
+							   pLight.constant);
+
+	return (color * attenuation);
+}
+
 vec4 CalcPointLights()
 {
 	vec4 totalColor = vec4(0, 0, 0, 0);
 	for (int i = 0; i < pointLightCount; ++i)
 	{
-		// Calculate the direction
-		vec3 direction = vPosition - pointLights[i].position;
-		float distance = length(direction);
+		totalColor += CalcPointLight(pointLights[i]);
+	}
 
-		// Direction Vector Normalized
-		direction = normalize(direction);
+	return totalColor;
+}
 
-		vec4 color = CalcLightByDirection(pointLights[i].base, direction);
+vec4 CalcSpotLight(SpotLight sLight)
+{
+	vec3 rayDirection = normalize(vPosition - sLight.base.position);
+	float slFactor = dot(rayDirection, sLight.direction);
 
-		// ax^2 + bx + c -> x being the distance
-		float attenuation = 1.0 / (pointLights[i].exponent * distance * distance +
-								   pointLights[i].linear * distance +
-							       pointLights[i].constant);
+	if (slFactor > sLight.edge) 
+	{
+		vec4 color = CalcPointLight(sLight.base);
+		return color * (1.0f - (1.0f - slFactor) * (1.0f / (1.0f - sLight.edge)));
+	} else {
+		return vec4(0, 0, 0, 0);
+	}
+}
 
-		totalColor += color * attenuation;
+vec4 CalcSpotLights()
+{
+	vec4 totalColor = vec4(0, 0, 0, 0);
+	for (int i = 0; i < spotLightCount; ++i)
+	{
+		totalColor += CalcSpotLight(spotLights[i]);
 	}
 
 	return totalColor;
@@ -123,10 +163,12 @@ void main()
 	// Point Lights
 	finalColor += CalcPointLights();
 
-	float distance = distance(cameraPos, vPosition);
+	// Spot Lights
+	finalColor += CalcSpotLights();
 	
 	// -- Fog Stuff --
 	// Linear Fog
+	//float distance = distance(cameraPos, vPosition);
 	//float fogFactor = getFogFactor(distance);
 	// SmoothStep Fog w/ Near & Far
 	//float fogDepthAmnt = length(v_fogDepth);
@@ -134,7 +176,12 @@ void main()
 	// Fog Color
 	//vec4 fogColor = vec4(0.3f, .37f, .44f, 1.f); // End -- Fog Stuff --
 
-	color = texture(theTexture, TexCoord) * finalColor;
+	vec4 fragColor = texture(theTexture, TexCoord) * finalColor;
+	
+	if (fragColor.a < 0.15)
+		discard;
+
+	color = fragColor;
 
 	//color = mix(color, fogColor, fogFactor); // Uncomment to incorporate Fog
 }
