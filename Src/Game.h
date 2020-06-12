@@ -7,7 +7,11 @@
 #include "Texture.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "Material.h"
+#include "Vertex.h"
+#include "ObjLoader.h"
+#include "Mesh.h"
 
 #include <GLFW\glfw3.h>
 #include <glm\glm.hpp>
@@ -74,9 +78,11 @@ private:
 
 	Texture m_BrickTexture;
 	Texture m_DirtTexture;
+	Texture m_CubeTexture;
 
 	DirectionalLight m_Light;
 	std::vector<PointLight> m_PointLights;
+	std::vector<SpotLight> m_SpotLights;
 
 	Material m_MaterialOne;
 

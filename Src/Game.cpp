@@ -67,6 +67,7 @@ bool Game::Initialize()
 	}
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 
 	// Setup Viewport Size
 	glViewport(0, 0, m_BufferWidth, m_BufferHeight);
@@ -88,24 +89,40 @@ void Game::Start()
 	m_MeshList.push_back(CreateFloor()); // Floor
 	CreateShader();
 
+	// Load OBJ Files
+	auto DirtCubeObj = LoadOBJ("ObjFiles/DirtCube.obj");
+	Mesh dirtCube = Mesh(std::get<0>(DirtCubeObj), std::get<1>(DirtCubeObj));
+
+	MeshRenderer* obj = new MeshRenderer();
+	obj->CreateMesh(dirtCube);
+	m_MeshList.push_back(obj);
+
 	// Camera Initialization
 	m_MainCamera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
 
 	// Texture Initialization
 	m_BrickTexture = Texture("Textures/brick.png");
-	m_BrickTexture.LoadTexture();
+	m_BrickTexture.LoadTexture(GL_REPEAT);
 
 	m_DirtTexture = Texture("Textures/dirt.png");
-	m_DirtTexture.LoadTexture();
+	m_DirtTexture.LoadTexture(GL_REPEAT);
+	
+	m_CubeTexture = Texture("Textures/cube.png");
+	m_CubeTexture.LoadTexture(GL_CLAMP_TO_EDGE);
 
 	// Directional Light
-	m_Light = DirectionalLight(direction_of_light, glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.3f);
+	m_Light = DirectionalLight(direction_of_light, glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.4f);
 
 	// Point Lights
-	PointLight p1 = PointLight(glm::vec3(-4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 1.0f);
-	PointLight p2 = PointLight(glm::vec3(4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 0.0f, 1.0f), 0.4f, 0.8f);
+	PointLight p1 = PointLight(glm::vec3(-4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 0.8f);
+	PointLight p2 = PointLight(glm::vec3(4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 0.6f);
 	m_PointLights.push_back(p1);
 	m_PointLights.push_back(p2);
+
+	SpotLight s1 = SpotLight(glm::vec3(0.0f, -1.0f, 0.0f), 30.0f, glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
+	SpotLight s2 = SpotLight(glm::vec3(-5.0f, -1.0f, 0.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f);
+	m_SpotLights.push_back(s1);
+	m_SpotLights.push_back(s2);
 
 	// Material (Specular)
 	m_MaterialOne = Material(glm::vec3(1.0f));
@@ -251,12 +268,16 @@ void Game::Render()
 
 	Shader* shader = m_ShaderList[0];
 
-	shader->Set1i(m_PointLights.size(), "pointLightCount");
-
 	m_Light.SendToShader(*shader);
 
+	shader->Set1i(m_PointLights.size(), "pointLightCount");
 	for (int i = 0; i < m_PointLights.size(); ++i) {
 		m_PointLights[i].SendToShader(*shader, i);
+	}	
+
+	shader->Set1i(m_SpotLights.size(), "spotLightCount");
+	for (int i = 0; i < m_SpotLights.size(); ++i) {
+		m_SpotLights[i].SendToShader(*shader, i);
 	}
 
 	m_MaterialOne.SendToShader(*shader);
@@ -299,7 +320,18 @@ void Game::Render()
 	shader->Use();
 	m_MeshList[2]->Render();
 
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 0.0f));
+	transposedInverse = glm::transpose(glm::inverse(model));
+	shader->SetMat4f(model, "model");
+	shader->SetMat4f(transposedInverse, "inverseTModel");
+	m_CubeTexture.UseTexture();
+	shader->Use();
+	m_MeshList[3]->Render();
+
 	glUseProgram(0);
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glfwSwapBuffers(m_MainWindow);
 }

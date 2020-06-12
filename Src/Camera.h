@@ -20,6 +20,7 @@ public:
 	glm::mat4 CalculateViewMatrix();
 
 	glm::vec3 GetPosition() const { return m_Position; }
+	glm::vec3 GetDirection() const { return glm::normalize(m_Front); }
 
 private:
 	void Update();
