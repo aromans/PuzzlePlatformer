@@ -39,12 +39,56 @@ void MeshRenderer::CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void MeshRenderer::CreateMesh(Mesh& mesh)
+{
+	m_IndexCount = 0;//mesh.IndexCount();
+	m_VertexCount = mesh.VertexAmount();
+
+	// Generate and Bind VAO
+	glGenVertexArrays(1, &m_VAO);
+	glBindVertexArray(m_VAO);
+
+	// Generate and Bind IBO
+	glGenBuffers(1, &m_IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.IndicesSize(), mesh.Indices(), GL_STATIC_DRAW);
+
+	// Generate and Bind 
+	glGenBuffers(1, &m_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, mesh.VerticesSize(), mesh.Vertices(), GL_STATIC_DRAW);
+
+	// Vertex Attributes
+	mesh.AssignAttributes(0, 3, (GLvoid*)offsetof(Vertex, position));
+	// Color Attributes
+	//mesh.AssignAttributes(1, 3, (GLvoid*)offsetof(Vertex, color));
+	// UV Coordinate Attributes
+	mesh.AssignAttributes(1, 2, (GLvoid*)offsetof(Vertex, texcoord));
+	// Normal Attributes
+	mesh.AssignAttributes(2, 3, (GLvoid*)offsetof(Vertex, normal));
+
+	// Unbinding Vertex Buffer Object(s)
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Unbinding Vertex Array Object(s)
+	glBindVertexArray(0);
+
+	// Unbinding the Index Buffer Object(s)
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 void MeshRenderer::Render()
 {
 	glBindVertexArray(m_VAO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	if (this->m_IndexCount != 0) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
+		glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+	else
+	{
+		glDrawArrays(GL_TRIANGLES, 0, this->m_VertexCount);
+	}
 	glBindVertexArray(0);
 }
 
