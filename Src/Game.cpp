@@ -16,8 +16,6 @@ Game::~Game()
 	}
 }
 
-glm::vec3 direction_of_light = glm::vec3(0.0f, 0.0f, -1.0f);
-
 bool Game::Initialize()
 {
 	// Initialize GLFW
@@ -54,7 +52,7 @@ bool Game::Initialize()
 	CreateCallBacks();
 
 	// Keeps cursor in the window
-	glfwSetInputMode(m_MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(m_MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Allow modern extension features
 	glewExperimental = GL_TRUE;
@@ -67,7 +65,8 @@ bool Game::Initialize()
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
+	//glEnable(GL_BACK)
 
 	// Setup Viewport Size
 	glViewport(0, 0, m_BufferWidth, m_BufferHeight);
@@ -76,56 +75,98 @@ bool Game::Initialize()
 	glfwSetWindowUserPointer(m_MainWindow, this);
 
 	// Calculate Projection Matrix
-	proj = glm::perspective(glm::radians(45.0f), (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight, 0.1f, 100.0f);
+	GLfloat aspectRatio = (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight;
+	proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+	/*proj = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, 0.0f, 1000.0f);
+	proj = glm::scale(proj, glm::vec3(0.55f, 0.55f, 0.55f));*/
 
 	return true;
 }
 
+std::vector<int> tree_locations;
+
 void Game::Start() 
 {
-	// Mesh & Shader Initialization
+	// Shader Initialization
+	Shader* basicShader = new Shader("Shaders/vShader.glsl", "Shaders/fShader.glsl");
+	m_ShaderList.push_back(basicShader);
+	Shader* normalShader = new Shader("Shaders/normalVShader.glsl", "Shaders/normalFShader.glsl");
+	m_ShaderList.push_back(normalShader);
+
+	// Texture Initialization
+	m_DirtMat = new Material(m_ShaderList[1], "Textures/brick.png", "");
+	m_DirtMat->SetProperties(glm::vec3(0.3f), 0.2f);
+
+	m_BrickMat = new Material(m_ShaderList[1], "Textures/dirt.png", "");
+	m_BrickMat->SetProperties(glm::vec3(0.3f), 0.2f);
+
+	// Material Initialization
+	m_DirtCubeMat = new Material(m_ShaderList[1], "Textures/cube.png", "Textures/cube_normal.png");
+	m_DirtCubeMat->SetProperties(glm::vec3(0.3f), 0.2f);
+
+	m_TreeMat = new Material(m_ShaderList[1], "Textures/CartoonTree.png", "");
+	m_TreeMat->SetProperties(glm::vec3(0.3f), 0.2f);
+
+	m_RoboMat = new Material(m_ShaderList[1], "Textures/Robo.png", "Textures/Robo_normal.png");
+	m_RoboMat->SetProperties(glm::vec3(0.3f), 0.2f);
+
+	// Primitive Mesh Initialization
 	m_MeshList.push_back(CreateMesh());	 // Pyramid 1
 	m_MeshList.push_back(CreateMesh());	 // Pyramid 2
 	m_MeshList.push_back(CreateFloor()); // Floor
-	CreateShader();
 
 	// Load OBJ Files
 	auto DirtCubeObj = LoadOBJ("ObjFiles/DirtCube.obj");
-	Mesh dirtCube = Mesh(std::get<0>(DirtCubeObj), std::get<1>(DirtCubeObj));
+	m_DirtCube = new Mesh(std::get<0>(DirtCubeObj), std::get<1>(DirtCubeObj));
+
+	auto TreeObj = LoadOBJ("ObjFiles/CartoonTree1.obj");
+	m_Tree = new Mesh(std::get<0>(TreeObj), std::get<1>(TreeObj));
+
+	auto RoboObj = LoadOBJ("ObjFiles/TempChar.obj");
+	m_Robo = new Mesh(std::get<0>(RoboObj), std::get<1>(RoboObj));
 
 	MeshRenderer* obj = new MeshRenderer();
-	obj->CreateMesh(dirtCube);
-	m_MeshList.push_back(obj);
+	obj->CreateMesh(m_DirtCube, m_DirtCubeMat);
+	
+	MeshRenderer* obj2 = new MeshRenderer();
+	obj2->CreateMesh(m_Tree, m_TreeMat);
+
+	MeshRenderer* obj3 = new MeshRenderer();
+	obj3->CreateMesh(m_Robo, m_RoboMat);
+
+	m_MeshList.push_back(obj2);
+	m_MeshList.push_back(obj3);
+
+	// 3x3 Level
+	for (int i = 0; i < 9; ++i)
+		m_MeshList.push_back(obj);
+
+	// 5x5 Level 
+	for (int i = 0; i < 25; ++i)
+		m_MeshList.push_back(obj);
+	tree_locations = { 4, 6, 7, 8, 12, 16, 17 };
 
 	// Camera Initialization
-	m_MainCamera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 5.0f, 0.5f);
-
-	// Texture Initialization
-	m_BrickTexture = Texture("Textures/brick.png");
-	m_BrickTexture.LoadTexture(GL_REPEAT);
-
-	m_DirtTexture = Texture("Textures/dirt.png");
-	m_DirtTexture.LoadTexture(GL_REPEAT);
-	
-	m_CubeTexture = Texture("Textures/cube.png");
-	m_CubeTexture.LoadTexture(GL_CLAMP_TO_EDGE);
+	m_MainCamera = Camera(glm::vec3(0.0f, 2.f, 4.f), glm::vec3(0.0f, -.6f, -1.1f));
 
 	// Directional Light
-	m_Light = DirectionalLight(direction_of_light, glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.4f);
+	m_Light = DirectionalLight(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), .3f, .7f);
 
 	// Point Lights
-	PointLight p1 = PointLight(glm::vec3(-4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 0.8f);
-	PointLight p2 = PointLight(glm::vec3(4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 0.6f);
+	PointLight p1 = PointLight(glm::vec3(-1.1f, -1.f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, .6f);
+	PointLight p2 = PointLight(glm::vec3(1.1f, -1.f, 0.0f), 0.3f, 0.2f, 0.1f, glm::vec3(0.0f, 0.0f, 1.0f), 0.0f, 1.f);
+	PointLight p3 = PointLight(glm::vec3(-1.1f, -1.f, -2.2f), 0.3f, 0.2f, 0.1f, glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, 1.2f);
 	m_PointLights.push_back(p1);
 	m_PointLights.push_back(p2);
+	m_PointLights.push_back(p3);
 
-	SpotLight s1 = SpotLight(glm::vec3(0.0f, -1.0f, 0.0f), 30.0f, glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
-	SpotLight s2 = SpotLight(glm::vec3(-5.0f, -1.0f, 0.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f);
-	m_SpotLights.push_back(s1);
-	m_SpotLights.push_back(s2);
+	//SpotLight s1 = SpotLight(glm::vec3(0.0f, -1.0f, 0.0f), 20.0f, glm::vec3(0.0f, 5.f, 0.0f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f);
+	//SpotLight s2 = SpotLight(glm::vec3(-5.0f, -1.0f, 0.0f), 10.0f, glm::vec3(2.0f, -1.0f, 0.0f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f);
+	//m_SpotLights.push_back(s1);
+	//m_SpotLights.push_back(s2);
 
 	// Material (Specular)
-	m_MaterialOne = Material(glm::vec3(1.0f));
+	//m_MaterialOne = Material(glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(.5f), glm::vec3(1.f, 1.f, 1.f));
 }
 
 void Game::HandleInput()
@@ -151,10 +192,10 @@ void Game::HandleKeys(GLFWwindow* window, int key, int code, int action, int mod
 	}
 
 	if (key >= 0 && key < 1024) {
-		if (action == GLFW_PRESS) {
+		if (theGame->Keys[key] == false && action == GLFW_PRESS) {
 			theGame->Keys[key] = true;
 		}
-		else if (action == GLFW_RELEASE) {
+		else if (theGame->Keys[key] == true && action == GLFW_RELEASE) {
 			theGame->Keys[key] = false;
 		}
 	}
@@ -173,6 +214,7 @@ void Game::HandleMouse(GLFWwindow* window, double xPos, double yPos)
 	theGame->LastPos = std::make_pair(xPos, yPos);
 }
 
+// Utility Function for below Primitives (Pyramid)
 void Game::CalculateAverageNormals(unsigned int* indices, unsigned int indexCount, GLfloat* vertices, 
 								   unsigned int vertexCount, unsigned int vLength, unsigned int normalOffset) 
 {
@@ -202,6 +244,7 @@ void Game::CalculateAverageNormals(unsigned int* indices, unsigned int indexCoun
 	}
 }
 
+// Primitives -- Pyramid && Quad 
 MeshRenderer* Game::CreateMesh()
 {
 	unsigned int indices[] = {
@@ -222,11 +265,10 @@ MeshRenderer* Game::CreateMesh()
 	CalculateAverageNormals(indices, 12, vertices, 32, 8, 5);
 
 	MeshRenderer *obj = new MeshRenderer();
-	obj->CreateMesh(vertices, indices, 32, 12);
+	obj->CreateMesh(vertices, indices, 32, 12, m_BrickMat);
 	//m_MeshList.push_back(obj);
 	return obj;
 }
-
 MeshRenderer* Game::CreateFloor()
 {
 	unsigned int floorIndices[] = {
@@ -242,91 +284,143 @@ MeshRenderer* Game::CreateFloor()
 	};
 
 	MeshRenderer* floor = new MeshRenderer();
-	floor->CreateMesh(floorVertices, floorIndices, 32, 6);
+	floor->CreateMesh(floorVertices, floorIndices, 32, 6, m_DirtMat);
 	//m_MeshList.push_back(floor);
 	return floor;
 }
 
-void Game::CreateShader() {
-	Shader *shader = new Shader("Shaders/vShader.glsl", "Shaders/fShader.glsl");
-	m_ShaderList.push_back(shader);
-}
-
+// Update Loop
 void Game::Update(double dt) 
 { 
 	// Camera Controls 
 	m_MainCamera.Move(Keys, dt);
-	m_MainCamera.Rotate(GetChangedPos());
 }
 
+// Render Loop
 void Game::Render()
 {
 	// Clear window
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//glClearColor(0.3f, .37f, .44f, 1.f);
+	glClearColor(0.15f, 0.11f, 0.19f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Shader* shader = m_ShaderList[0];
+	Shader* shader = m_ShaderList[1];
 
 	m_Light.SendToShader(*shader);
 
 	shader->Set1i(m_PointLights.size(), "pointLightCount");
 	for (int i = 0; i < m_PointLights.size(); ++i) {
 		m_PointLights[i].SendToShader(*shader, i);
-	}	
+	}
 
 	shader->Set1i(m_SpotLights.size(), "spotLightCount");
 	for (int i = 0; i < m_SpotLights.size(); ++i) {
 		m_SpotLights[i].SendToShader(*shader, i);
 	}
 
-	m_MaterialOne.SendToShader(*shader);
-	shader->SetMat4f(proj, "projection");
-	shader->SetMat4f(m_MainCamera.CalculateViewMatrix(), "view");
+
+	glm::mat4 model(1.0f); // Identity 4x4 Matrix
+	glm::mat4 transposedInverse(1.0f);
+	glm::mat4 view = m_MainCamera.CalculateViewMatrix();
+	glm::mat4 viewModel = view * model;
+	glm::mat3 ModelView3x3 = glm::mat3(viewModel);
+	glm::mat4 mvp;
+
+	shader->SetMat4f(model, "M");
+	shader->SetMat4f(view, "V");
 	shader->SetVec3f(m_MainCamera.GetPosition(), "cameraPos");
 
 	// Brick Pyramid
-	glm::mat4 model(1.0f); // Identity 4x4 Matrix
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
-	//model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	//model = glm::scale(model, glm::vec3(currSize, currSize, 1.0f));
-	glm::mat4 transposedInverse = glm::transpose(glm::inverse(model));	// Its expensive doing this on the GPU, 
-																		// so we do it on the CPU and pass it to the GPU
-	shader->SetMat4f(model, "model");
-	shader->SetMat4f(transposedInverse, "inverseTModel");
-	m_BrickTexture.UseTexture();
-	shader->Use();
-	m_MeshList[0]->Render();
-
+	//model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+	////model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	////model = glm::scale(model, glm::vec3(currSize, currSize, 1.0f));
+	//transposedInverse = glm::transpose(glm::inverse(model));	// Its expensive doing this on the GPU, 
+	//														    // so we do it on the CPU and pass it to the GPU
+	//shader->SetMat4f(model, "model");
+	//shader->SetMat4f(transposedInverse, "inverseTModel");
+	//m_BrickTexture.UseTexture();
+	//shader->Use();
+	//m_MeshList[0]->Render();
 	// Dirt Pyramid
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 4.0f, -2.5f));
-	//model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-	//model = glm::scale(model, glm::vec3(currSize + 0.2f, currSize + 0.2f, 1.0f));
-	transposedInverse = glm::transpose(glm::inverse(model));
-	shader->SetMat4f(model, "model");
-	shader->SetMat4f(transposedInverse, "inverseTModel");
-	m_DirtTexture.UseTexture();
-	shader->Use();
-	m_MeshList[1]->Render();
-
+	//model = glm::mat4(1.0f);
+	//model = glm::translate(model, glm::vec3(0.0f, 4.0f, -2.5f));
+	////model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	////model = glm::scale(model, glm::vec3(currSize + 0.2f, currSize + 0.2f, 1.0f));
+	//transposedInverse = glm::transpose(glm::inverse(model));
+	//shader->SetMat4f(model, "model");
+	//shader->SetMat4f(transposedInverse, "inverseTModel");
+	//m_DirtTexture.UseTexture();
+	//shader->Use();
+	//m_MeshList[1]->Render();
 	// Floor Model
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-	transposedInverse = glm::transpose(glm::inverse(model));
-	shader->SetMat4f(model, "model");
-	shader->SetMat4f(transposedInverse, "inverseTModel");
-	m_DirtTexture.UseTexture();
-	shader->Use();
-	m_MeshList[2]->Render();
+	//model = glm::mat4(1.0f);
+	//model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+	//transposedInverse = glm::transpose(glm::inverse(model));
+	//glm::mat4 mvp = proj * view * model;
+	//shader->SetMat4f(mvp, "MVP");
+	//m_MeshList[2]->Render();
 
+	int start = 5;
+	float increment = -1.1f;
+	float size = -1.1;
+	float z = 0.0f;
+
+	// Character Model Render for 5x5 level
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 0.0f));
-	transposedInverse = glm::transpose(glm::inverse(model));
-	shader->SetMat4f(model, "model");
-	shader->SetMat4f(transposedInverse, "inverseTModel");
-	m_CubeTexture.UseTexture();
-	shader->Use();
+	model = glm::translate(model, glm::vec3(1.1, -1.5f, z));
+	mvp = proj * view * model;
+	shader->SetMat4f(mvp, "MVP");
+	m_MeshList[4]->Render();
+
+	// 5x5 Level Render
+	//for (int i = 0; i < 25; ++i) {
+	//	model = glm::mat4(1.0f);
+	//	model = glm::translate(model, glm::vec3(size, -1.5f, z));
+	//	mvp = proj * view * model;
+	//	shader->SetMat4f(mvp, "MVP");
+	//	m_MeshList[i + start]->Render();
+	//	if (std::find(tree_locations.cbegin(), tree_locations.cend(), i) != tree_locations.cend()) {
+	//		model = glm::mat4(1.0f);
+	//		model = glm::translate(model, glm::vec3(size, -1.5f, z));
+	//		mvp = proj * view * model;
+	//		shader->SetMat4f(mvp, "MVP");
+	//		m_MeshList[3]->Render();
+	//	}
+	//	size -= increment;
+	//	if ((i + 1) % 5 == 0) {
+	//		size = -2.2;
+	//		z -= 1.1f;
+	//	}
+	//}
+	
+	for (int i = 0; i < 9; ++i) {
+		// Transform the Model
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(size, -1.5f, z));
+
+		mvp = proj * view * model;
+		shader->SetMat4f(mvp, "MVP");
+
+		// Tell Shader of the Changes Made
+		//SendNormalModelInfo(shader, model);
+
+		// Render the Mesh
+		m_MeshList[i + start]->Render();
+
+		// Level Layout Logic
+		size -= increment;
+		if ((i + 1) % 3 == 0) {
+			size = increment;
+			z -= 1.1f;
+		}
+	}
+
+	// Loading the Tree Model
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(1.1f, -1.5f, -2.2f));
+
+	mvp = proj * view * model;
+	shader->SetMat4f(mvp, "MVP");
+
 	m_MeshList[3]->Render();
 
 	glUseProgram(0);

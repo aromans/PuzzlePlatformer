@@ -41,7 +41,6 @@ public:
 
 	MeshRenderer* CreateMesh();
 	MeshRenderer* CreateFloor();
-	void CreateShader();
 
 	bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindow); }
 
@@ -76,16 +75,23 @@ private:
 	bool m_IsRunning;
 	glm::mat4 proj;
 
-	Texture m_BrickTexture;
-	Texture m_DirtTexture;
-	Texture m_CubeTexture;
-
+	// Scene Lighting
 	DirectionalLight m_Light;
 	std::vector<PointLight> m_PointLights;
 	std::vector<SpotLight> m_SpotLights;
 
-	Material m_MaterialOne;
+	Mesh* m_DirtCube;
+	Mesh* m_Tree;
+	Mesh* m_Robo;
 
+	// Not Needed
+	Material* m_DirtMat;
+	Material* m_BrickMat;
+	Material* m_DirtCubeMat;
+	Material* m_TreeMat;
+	Material* m_RoboMat;
+
+	// Scene Meshses && Shaders
 	std::vector<MeshRenderer*> m_MeshList;
 	std::vector<Shader*> m_ShaderList;
 };

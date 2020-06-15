@@ -11,22 +11,23 @@ out vec3 vPosition;
 
 //out vec3 v_fogDepth;
 
-uniform mat4 model;
+uniform mat4 MVP;
+uniform mat4 M;
+uniform mat4 V;
 uniform mat4 inverseTModel;
 uniform mat4 projection;
-uniform mat4 view;
 									     
 void main()
 {
-	gl_Position = projection * view * model * vec4(pos, 1.0);
+	gl_Position = MVP * vec4(pos, 1.0);
 	vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);
 
 	TexCoord = tex;
 
 	Normal = mat3(inverseTModel) * norm;
 
-	vPosition = (model * vec4(pos, 1.0)).xyz;
+	vPosition = (M * vec4(pos, 1.0)).xyz;
 
 	// Depth for SmoothStep Fog
-	//v_fogDepth = (view * vec4(pos, 1.0)).xyz;
+	//v_fogDepth = (V * vec4(pos, 1.0)).xyz;
 }

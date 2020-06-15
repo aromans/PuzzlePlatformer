@@ -12,7 +12,7 @@ public:
 	~Texture();
 
 	bool LoadTexture(GLint param);
-	void UseTexture();
+	void UseTexture(GLuint i);
 	void Clear();
 
 private:

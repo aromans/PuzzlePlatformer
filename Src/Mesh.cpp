@@ -2,20 +2,20 @@
 
 Mesh::Mesh()
 {
-	m_VertexInformation = {};
 	m_Vertices = {};
 	m_Indices = {};
 }
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
-	m_VertexInformation = vertices;
+	m_Vertices = vertices;
 	m_Indices = indices;
-
-	//AssembleVertexData();
+	//m_Tangents = tangents;
+	//m_Bitangents = bitangents;
 }
 
-Mesh::~Mesh() { }
+Mesh::~Mesh() { 
+}
 
 void Mesh::AssignAttributes(const GLuint& index, const GLint& size, const void* ptr)
 {
@@ -23,22 +23,8 @@ void Mesh::AssignAttributes(const GLuint& index, const GLint& size, const void* 
 	glEnableVertexAttribArray(index);
 }
 
-void Mesh::AssembleVertexData()
+void Mesh::AssignAttributes(const GLuint& index, const GLint& size, GLsizei stride, const void* ptr)
 {
-	//for (Vertex& v : m_VertexInformation)
-	//{
-	//	// Vertex Position
-	//	m_Vertices.push_back(v.position.x);
-	//	m_Vertices.push_back(v.position.y);
-	//	m_Vertices.push_back(v.position.z);
-
-	//	// UV Coordinates
-	//	m_Vertices.push_back(v.texcoord.x);
-	//	m_Vertices.push_back(v.texcoord.y);
-
-	//	// Normals
-	//	m_Vertices.push_back(v.normal.x);
-	//	m_Vertices.push_back(v.normal.y);
-	//	m_Vertices.push_back(v.normal.z);
-	//}
+	glVertexAttribPointer(index, size, GL_FLOAT, GL_FALSE, stride, ptr);
+	glEnableVertexAttribArray(index);
 }

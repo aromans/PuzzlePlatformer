@@ -1,15 +1,4 @@
-#version 460						 
-							
-in vec4 vColor;
-in vec2 TexCoord;
-in vec3 Normal;
-in vec3 vPosition;
-//in vec3 v_fogDepth;
-		 
-out vec4 color;
-
-const int MAX_POINT_LIGHTS = 5;
-const int MAX_SPOT_LIGHTS = 5;
+#version 460
 
 struct Light
 {
@@ -42,8 +31,22 @@ struct SpotLight
 
 struct Material
 {
+	sampler2D diffuse;
+	sampler2D normal;
 	vec3 specular;
+	float shininess;
 };
+
+in vec4 vColor;
+in vec2 TexCoord;
+in vec3 Normal;
+in vec3 vPosition;
+//in vec3 v_fogDepth;
+		 
+out vec4 color;
+
+const int MAX_POINT_LIGHTS = 5;
+const int MAX_SPOT_LIGHTS = 5;
 
 uniform int pointLightCount;
 uniform int spotLightCount;
@@ -52,9 +55,12 @@ uniform DLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 
-uniform sampler2D theTexture;
 uniform Material  material;
 uniform vec3      cameraPos;
+
+const float fogNear = 8.f;
+const float fogFar = 14.f;
+
 
 vec4 CalcLightByDirection(Light light, vec3 direction) 
 {
@@ -73,7 +79,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 		vec3 posToViewVector = normalize(cameraPos - vPosition);
 		vec3 reflectedVector = normalize(reflect(direction, normalize(Normal)));
 
-		float specularFactor = pow(max(dot(posToViewVector, reflectedVector), 0.0f), 32.0f);
+		float specularFactor = pow(max(dot(posToViewVector, reflectedVector), 0.0f), material.shininess);
 
 		specularColor = vec4(light.color * material.specular * specularFactor, 1.0f);
 	}
@@ -151,9 +157,6 @@ float getFogFactor(float d)
 
 	return 1 - (max - d) / (max - min);
 }
-
-const float fogNear = 8.f;
-const float fogFar = 14.f;
 									 
 void main() 
 {
@@ -176,12 +179,14 @@ void main()
 	// Fog Color
 	//vec4 fogColor = vec4(0.3f, .37f, .44f, 1.f); // End -- Fog Stuff --
 
-	vec4 fragColor = texture(theTexture, TexCoord) * finalColor;
+	vec4 fragColor = texture(material.diffuse, TexCoord) * finalColor;
 	
-	if (fragColor.a < 0.15)
+	if (fragColor.a < 0.5)
 		discard;
 
 	color = fragColor;
+
+	//color = vec4(pass_tang, 1.0);
 
 	//color = mix(color, fogColor, fogFactor); // Uncomment to incorporate Fog
 }

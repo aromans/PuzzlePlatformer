@@ -1,87 +1,66 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch, GLfloat move_speed, GLfloat turn_speed)
+Camera::Camera() { }
+
+Camera::Camera(glm::vec3 position, GLfloat pitch, GLfloat yaw)
 {
 	m_Position = position;
-	m_WorldUp = up;
-	m_Yaw = yaw;
-	m_Pitch = pitch;
+
 	m_Front = glm::vec3(0.0f, 0.0f, -1.0f);
+	m_WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	m_MovementSpeed = move_speed;
-	m_TurnSpeed = turn_speed;
+	m_Theta = 0.f;
 
-	Update();
+	m_Distance = (GLfloat)(glm::length(m_Direction));
+
+	CalculateLocalPosition();
 }
 
-Camera::Camera() { }
+Camera::Camera(glm::vec3 position, glm::vec3 target)
+{
+	m_Position = position;
+	m_TargetPosition = target;
+
+	m_Direction = m_TargetPosition - m_Position;
+
+	m_Theta = 0.f;
+
+	m_Front = glm::vec3(0.0f, 0.0f, -1.0f);
+	m_WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	m_Distance = (GLfloat)(glm::length(m_Direction));
+
+	CalculateLocalPosition();
+}
 
 Camera::~Camera()
 {
-
 }
 
-void Camera::Update()
+void Camera::Move(bool* keys, double& dt)
 {
-	m_Front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
-	m_Front.y = sin(glm::radians(m_Pitch));
-	m_Front.z = sin(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
-	m_Front = glm::normalize(m_Front);
-
-	m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));
-	m_Up = glm::normalize(glm::cross(m_Right, m_Front));
-}
-
-void Camera::Move(bool* keys, GLfloat deltaTime)
-{
-	if (keys[GLFW_KEY_W]) {
-		m_Position += m_Front * m_MovementSpeed * deltaTime;
-	}
-
-	if (keys[GLFW_KEY_S]) {
-		m_Position -= m_Front * m_MovementSpeed * deltaTime;
+	if (keys[GLFW_KEY_D]) {
+		m_Theta += 1.f;
 	}	
 	
-	if (keys[GLFW_KEY_D]) {
-		m_Position += m_Right * m_MovementSpeed * deltaTime;
-	}
-
 	if (keys[GLFW_KEY_A]) {
-		m_Position -= m_Right * m_MovementSpeed * deltaTime;
+		m_Theta -= 1.f;
 	}
 
-	if (keys[GLFW_KEY_UP]) {
-		m_MovementSpeed++;
-
-		if (m_MovementSpeed >= 15.0f) m_MovementSpeed = 15.0f;
-	}
-	else if (keys[GLFW_KEY_DOWN]) {
-		m_MovementSpeed--;
-
-		if (m_MovementSpeed <= 0.0f) m_MovementSpeed = 0.0f;
-	}
-}
-
-// TODO: Mouse Sensitivity is REALLY high - should refactor and improve upon later . . .
-void Camera::Rotate(std::pair<GLfloat, GLfloat> rotation_delta)
-{
-	GLfloat xChange = rotation_delta.first * m_TurnSpeed; 
-	GLfloat yChange = rotation_delta.second * m_TurnSpeed;
-
-	m_Yaw += xChange;
-	m_Pitch += yChange;
-
-	if (m_Pitch > 89.0f) {
-		m_Pitch = 89.0f;
-	} else if (m_Pitch < -89.0f) {
-		m_Pitch = -89.0f;
-	}
-
-	Update();
+	GLfloat xOffset = (GLfloat)(m_Distance * sin(glm::radians(m_Theta)) - m_Position.x);
+	GLfloat zOffset = (GLfloat)(m_Distance * cos(glm::radians(m_Theta)) - m_Position.z);
+	m_Position.x += xOffset;
+	m_Position.z += zOffset;
 }
 
 glm::mat4 Camera::CalculateViewMatrix()
 {
-	return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
+	return glm::lookAt(m_Position, m_TargetPosition, m_WorldUp);
 }
 
+void Camera::CalculateLocalPosition()
+{
+	m_Front = glm::normalize(m_Direction);
+	m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));
+	m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+}

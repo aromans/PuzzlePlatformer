@@ -15,6 +15,44 @@
 #include <sstream>
 #include <algorithm>
 #include <tuple>
+#include <map>
+
+static void CalculateNormalMappingInfo(Vertex& v0, Vertex& v1, Vertex& v2, std::vector<glm::vec3>& tangents, std::vector<glm::vec3>& bitangents)
+{
+	glm::vec3& p0 = v0.position;
+	glm::vec3& p1 = v1.position;
+	glm::vec3& p2 = v2.position;
+
+	glm::vec2& uv0 = v0.texcoord;
+	glm::vec2& uv1 = v1.texcoord;
+	glm::vec2& uv2 = v2.texcoord;
+
+	glm::vec3 deltaPos1 = p1 - p0;
+	glm::vec3 deltaPos2 = p2 - p0;
+
+	glm::vec2 deltaUV1 = uv1 - uv0;
+	glm::vec2 deltaUV2 = uv2 - uv0;
+
+	float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+	glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+	glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+	tangents.push_back(tangent);
+	tangents.push_back(tangent);
+	tangents.push_back(tangent);
+	bitangents.push_back(bitangent);
+	bitangents.push_back(bitangent);
+	bitangents.push_back(bitangent);
+}
+
+static void DealWithSet(Vertex& v0, Vertex& v1, Vertex& v2, std::vector<Vertex>& vertices, std::vector<glm::vec3>& tangents, std::vector<glm::vec3>& bitangents)
+{
+	CalculateNormalMappingInfo(v0, v1, v2, tangents, bitangents);
+
+	vertices.push_back(v0);
+	vertices.push_back(v1);
+	vertices.push_back(v2);
+}
 
 static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const char* file_path)
 {
@@ -22,6 +60,10 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 	std::vector<glm::vec3> vertex_positions;
 	std::vector<glm::vec2> vertex_texcoords;
 	std::vector<glm::vec3> vertex_normals;
+
+	// Normal Mapping Calculations
+	std::vector<glm::vec3> tangents;
+	std::vector<glm::vec3> bitangents;
 
 	// Face Information
 	std::vector<std::tuple<GLint, GLint, GLint>> obj_faces;
@@ -34,6 +76,8 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 	std::string line = "";
 	std::string prefix = "";
 	std::ifstream stream(file_path);
+
+	std::map<Vertex, int> vertex_hash;
 
 	if (stream.is_open()) 
 	{
@@ -85,19 +129,56 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 					faces.push_back(std::make_tuple(vIndex, tIndex, nIndex));
 				}
 
-				// Tri 1
-				obj_faces.push_back(faces[0]);
-				obj_faces.push_back(faces[1]);
-				obj_faces.push_back(faces[2]);
-
-				// Quad
-				if (faces.size() >= 4) 
-				{
-					// Tri 2
-					obj_faces.push_back(faces[0]);
-					obj_faces.push_back(faces[2]);
-					obj_faces.push_back(faces[3]);
+				if (faces.size() >= 4) {
+					printf("WARNING! The mesh at filepath '%s' is using quad faces! Try exporting the mesh with triangular faces instead!", file_path);
+					return {};
 				}
+
+				Vertex v0;
+				v0.position = vertex_positions[std::get<0>(faces[0]) - 1];
+				v0.texcoord = vertex_texcoords[std::get<1>(faces[0]) - 1];
+				v0.normal = vertex_normals[std::get<2>(faces[0]) - 1];
+				Vertex v1;
+				v1.position = vertex_positions[std::get<0>(faces[1]) - 1];
+				v1.texcoord = vertex_texcoords[std::get<1>(faces[1]) - 1];
+				v1.normal = vertex_normals[std::get<2>(faces[1]) - 1];
+				Vertex v2;
+				v2.position = vertex_positions[std::get<0>(faces[2]) - 1];
+				v2.texcoord = vertex_texcoords[std::get<1>(faces[2]) - 1];
+				v2.normal = vertex_normals[std::get<2>(faces[2]) - 1];
+
+				DealWithSet(v0, v1, v2, vertices, tangents, bitangents);
+
+				// Tri 1
+				//obj_faces.push_back(faces[0]);
+				//obj_faces.push_back(faces[1]);
+				//obj_faces.push_back(faces[2]);
+
+				//glm::vec3& v0 = vertex_positions[std::get<0>(faces[0]) - 1];
+				//glm::vec3& v1 = vertex_positions[std::get<0>(faces[1]) - 1];
+				//glm::vec3& v2 = vertex_positions[std::get<0>(faces[2]) - 1];
+
+				//glm::vec2& uv0 = vertex_texcoords[std::get<1>(faces[0]) - 1];
+				//glm::vec2& uv1 = vertex_texcoords[std::get<1>(faces[1]) - 1];
+				//glm::vec2& uv2 = vertex_texcoords[std::get<1>(faces[2]) - 1];
+
+				//glm::vec3 deltaPos1 = v1 - v0;
+				//glm::vec3 deltaPos2 = v2 - v0;
+
+				//glm::vec2 deltaUV1 = uv1 - uv0;
+				//glm::vec2 deltaUV2 = uv2 - uv0;
+
+				//float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+				//glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				//glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+				//tangents.push_back(tangent);
+				//tangents.push_back(tangent);
+				//tangents.push_back(tangent);
+
+				//bitangents.push_back(bitangent);
+				//bitangents.push_back(bitangent);
+				//bitangents.push_back(bitangent);
 			}
 		}
 	}
@@ -108,31 +189,54 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 
 	stream.close();
 
-	// Reserve size needed for Vertices to build mesh
-	//vertices.resize(obj_faces.size(), Vertex());
+	std::vector<glm::vec3> indexed_tangents;
+	std::vector<glm::vec3> indexed_bitangents;
 
-	try 
+	std::vector<Vertex> out_vertices;
+
+	for (int i = 0; i < vertices.size(); ++i)
 	{
-		for (const auto& face : obj_faces)
-		{
-			unsigned int vIndex = std::get<0>(face) - 1;
-			indices.push_back(vIndex);
+		Vertex v = vertices[i];
 
-			Vertex v;
-			v.color = glm::vec3(1.0f, 1.0f, 1.0f);
-			v.position = vertex_positions[vIndex];
-			v.texcoord = vertex_texcoords[(std::get<1>(face) - 1)];
-			v.normal = vertex_normals[(std::get<2>(face) - 1)];
-			vertices.push_back(v);
+		std::map<Vertex, int>::iterator it = vertex_hash.find(v);
+
+		if (it != vertex_hash.end()) {
+			unsigned int index = (unsigned int)it->second;
+			indices.push_back(index);
+			indexed_tangents[index] += tangents[i];
+			indexed_bitangents[index] += bitangents[i];
+		}
+		else {
+			out_vertices.push_back(v);
+			indexed_tangents.push_back(tangents[i]);
+			indexed_bitangents.push_back(bitangents[i]);
+
+			unsigned int new_index = (unsigned int)out_vertices.size() - 1;
+			indices.push_back(new_index);
+			vertex_hash[v] = new_index;
 		}
 	}
-	catch (const std::exception& e) {
-		printf("SOMETHING HAS HAPPENED: '%s'", e.what());
-		return {};
+
+	for (int i = 0; i < out_vertices.size(); ++i) {
+
+		out_vertices[i].averagedTangent = glm::normalize(indexed_tangents[i]);
+		out_vertices[i].averagedBitangent = glm::normalize(indexed_bitangents[i]);
+
+		glm::vec3& n = out_vertices[i].normal;
+		glm::vec3& t = out_vertices[i].averagedTangent;
+		glm::vec3& b = out_vertices[i].averagedBitangent;
+
+		t = glm::normalize(t - n * glm::dot(n, t));
+
+		b = glm::normalize(glm::cross(t, n));
+
+		if (glm::dot(glm::cross(t, b), n) < 0.0f) {
+			t = t * -1.0f;
+		}
 	}
 
-	printf("OBJ file was successfully loaded! Number of Vertices (%i) and Indices (%i)", vertices.size(), indices.size());
+	printf("OBJ file was successfully loaded! Number of Vertices (%i) and Indices (%i)\n", out_vertices.size(), indices.size());
 
-	return { vertices, indices };
+	return { out_vertices, indices };
 }
 

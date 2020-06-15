@@ -12,30 +12,38 @@ class Camera
 {
 public:
 	Camera();
-	Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch, GLfloat move_speed, GLfloat turn_speed);
+
+	Camera(glm::vec3 position, GLfloat pitch, GLfloat yaw);
+	Camera(glm::vec3 position, glm::vec3 target);
+
 	~Camera();
 
-	void Move(bool* keys, GLfloat deltaTime);
-	void Rotate(std::pair<GLfloat, GLfloat> rotation_delta);
-	glm::mat4 CalculateViewMatrix();
+	void Move(bool* keys, double& dt);
 
 	glm::vec3 GetPosition() const { return m_Position; }
-	glm::vec3 GetDirection() const { return glm::normalize(m_Front); }
+
+	GLfloat DistanceFromTarget() const {
+		return m_Distance;
+	}
+
+	glm::mat4 CalculateViewMatrix();
 
 private:
-	void Update();
+	void CalculateLocalPosition();
 
 private:
+	// Camera Position & Look At target if exists
 	glm::vec3 m_Position;
+	glm::vec3 m_TargetPosition;
+	glm::vec3 m_Direction;
+	GLfloat m_Distance;
+	GLfloat m_Theta;
+
+	// Local Positions for Camera Orientation
 	glm::vec3 m_Front;
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
+
 	glm::vec3 m_WorldUp;
-
-	GLfloat m_Yaw;
-	GLfloat m_Pitch;
-
-	GLfloat m_MovementSpeed;
-	GLfloat m_TurnSpeed;
 };
 

@@ -28,6 +28,9 @@ void SpotLight::SendToShader(Shader& shader, const int& i)
 {
 	std::string prefix = "spotLights[" + std::to_string(i) + "].";
 
+
+	shader.SetVec3f(m_Position, ("spotLightPositions[" + std::to_string(i) + "]").c_str());
+
 	// Spot Light Settings
 	shader.SetVec3f(m_Direction, (prefix + "direction").c_str());
 	shader.Set1f(m_ProcEdge, (prefix + "edge").c_str());

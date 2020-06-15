@@ -1,24 +1,36 @@
 #pragma once
 
 #include "Shader.h"
+#include "Texture.h"
 
 #include <glm\glm.hpp>
+#include <string>
 
 class Material
 {
 public:
 	Material() {}
-
-	Material(glm::vec3 specular)
-	{
-		this->m_Specular = specular;
-	}
+	Material(Shader* shader, std::string diffuse_tex, std::string normal_tex);
 
 	~Material() {}
 
-	void SendToShader(Shader& shader);
+	void SetProperties(glm::vec3 specular, GLfloat shininess);
+	void AssignMaterial();
 
 private:
+
+	void ApplyUniforms();
+	//void SendToShader(Shader& shader);
+
+private:
+	Shader* m_Shader;
+
+	Texture m_Diffuse;
+	Texture m_Normal;
+
+	std::string m_NormalTex;
+
 	glm::vec3 m_Specular;
+	GLfloat m_Shininess;
 };
 

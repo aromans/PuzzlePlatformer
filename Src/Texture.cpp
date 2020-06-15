@@ -37,9 +37,9 @@ bool Texture::LoadTexture(GLint param)
 	return true;
 }
 
-void Texture::UseTexture()
+void Texture::UseTexture(GLuint i)
 {
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0+i);
 	glBindTexture(GL_TEXTURE_2D, m_TextureID);
 }
 

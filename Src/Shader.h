@@ -12,6 +12,7 @@
 class Shader
 {
 public:
+	Shader() { }
 	Shader(const char* vertexFile, const char* fragmentFile, const char* geometryFile = "")
 	{
 		GLuint vertexId = AddShader(ReadFile(vertexFile).c_str(), GL_VERTEX_SHADER);

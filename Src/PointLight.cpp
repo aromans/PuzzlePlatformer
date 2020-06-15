@@ -23,6 +23,8 @@ void PointLight::SendToShader(Shader& shader, const int& i)
 {
 	std::string prefix = "pointLights[" + std::to_string(i) + "].";
 
+	shader.SetVec3f(m_Position, ("pointLightPositions[" + std::to_string(i) + "]").c_str());
+
 	// Point Light Settings
 	shader.SetVec3f(m_Position, (prefix + "position").c_str());
 	shader.Set1f(m_Constant, (prefix + "constant").c_str());

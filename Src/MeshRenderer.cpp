@@ -4,8 +4,9 @@ MeshRenderer::MeshRenderer() : m_VAO(0), m_VBO(0), m_IBO(0), m_IndexCount(0) { }
 
 MeshRenderer::~MeshRenderer() { Clear(); }
 
-void MeshRenderer::CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned int num_of_vertices, unsigned int num_of_indices)
+void MeshRenderer::CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned int num_of_vertices, unsigned int num_of_indices, Material* material)
 {
+	m_Material = material;
 	m_IndexCount = num_of_indices;
 
 	// Generate and Bind Vertex Array Object(s)
@@ -39,33 +40,49 @@ void MeshRenderer::CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void MeshRenderer::CreateMesh(Mesh& mesh)
+void MeshRenderer::CreateMesh(Mesh* mesh, Material* material)
 {
-	m_IndexCount = 0;//mesh.IndexCount();
-	m_VertexCount = mesh.VertexAmount();
+	m_Mesh = mesh;
+	m_Material = material;
+	m_IndexCount = mesh->IndexCount();
+	m_VertexCount = mesh->VertexCount();
 
 	// Generate and Bind VAO
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
 	// Generate and Bind IBO
-	glGenBuffers(1, &m_IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.IndicesSize(), mesh.Indices(), GL_STATIC_DRAW);
+	if (m_IndexCount > 0) {
+		glGenBuffers(1, &m_IBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->IndicesSize(), &mesh->Indices()[0], GL_STATIC_DRAW);
+	}
 
 	// Generate and Bind 
 	glGenBuffers(1, &m_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, mesh.VerticesSize(), mesh.Vertices(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mesh->VerticesSize(), &mesh->Vertices()[0], GL_STATIC_DRAW);
+
+	// Generate and Bind Tangent Buffer
+	//glGenBuffers(1, &m_TangentBuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_TangentBuffer);
+	//glBufferData(GL_ARRAY_BUFFER, mesh->TangentsSize(), &mesh->Tangents()[0], GL_STATIC_DRAW);
+
+	//// Generate and Bind Bitangent Buffer
+	//glGenBuffers(1, &m_BitangentBuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_BitangentBuffer);
+	//glBufferData(GL_ARRAY_BUFFER, mesh->BitangentsSize(), &mesh->Bitangents()[0], GL_STATIC_DRAW);
 
 	// Vertex Attributes
-	mesh.AssignAttributes(0, 3, (GLvoid*)offsetof(Vertex, position));
-	// Color Attributes
-	//mesh.AssignAttributes(1, 3, (GLvoid*)offsetof(Vertex, color));
+	mesh->AssignAttributes(0, 3, (GLvoid*)offsetof(Vertex, position));
 	// UV Coordinate Attributes
-	mesh.AssignAttributes(1, 2, (GLvoid*)offsetof(Vertex, texcoord));
+	mesh->AssignAttributes(1, 2, (GLvoid*)offsetof(Vertex, texcoord));
 	// Normal Attributes
-	mesh.AssignAttributes(2, 3, (GLvoid*)offsetof(Vertex, normal));
+	mesh->AssignAttributes(2, 3, (GLvoid*)offsetof(Vertex, normal));
+	// Tangent Attributes
+	mesh->AssignAttributes(3, 3, (GLvoid*)offsetof(Vertex, averagedTangent));
+	// Bitangent Attributes
+	mesh->AssignAttributes(4, 3, (GLvoid*)offsetof(Vertex, averagedBitangent));
 
 	// Unbinding Vertex Buffer Object(s)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -79,16 +96,20 @@ void MeshRenderer::CreateMesh(Mesh& mesh)
 
 void MeshRenderer::Render()
 {
+	m_Material->AssignMaterial();
+
 	glBindVertexArray(m_VAO);
+
 	if (this->m_IndexCount != 0) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-		glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, (void*)0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	else
 	{
 		glDrawArrays(GL_TRIANGLES, 0, this->m_VertexCount);
 	}
+
 	glBindVertexArray(0);
 }
 
