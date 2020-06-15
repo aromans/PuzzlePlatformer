@@ -19,6 +19,7 @@ public:
 	~Camera();
 
 	void Move(bool* keys, double& dt);
+	void OnMouseMove(bool* keys, glm::vec2 currPos, glm::vec2 lastPos, double& dt);
 
 	glm::vec3 GetPosition() const { return m_Position; }
 

@@ -48,22 +48,23 @@ private:
 	// ** Temporary User Input Methods ** //
 	void CreateCallBacks();
 
-	std::pair<GLfloat, GLfloat> GetChangedPos() {
-		std::pair<GLfloat, GLfloat> changed = ChangedPos;
-		ChangedPos = std::make_pair(0.0f, 0.0f);
-		return changed;
-	}
+	//std::pair<GLfloat, GLfloat> GetChangedPos() {
+	//	std::pair<GLfloat, GLfloat> changed = ChangedPos;
+	//	ChangedPos = std::make_pair(0.0f, 0.0f);
+	//	return changed;
+	//}
 
 	static void HandleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 	static void HandleMouse(GLFWwindow* window, double xPos, double yPos);
+	static void HandleMouseButton(GLFWwindow* window, int button, int action, int mods);
 	// ** END TEMPORARY ** // 
 
 // --- VARIABLES ---
 public:
 	// ** Temporary User Input Variables ** //
 	bool Keys[1024];
-	std::pair<GLfloat, GLfloat> LastPos = std::make_pair(0.0f, 0.0f);
-	std::pair<GLfloat, GLfloat> ChangedPos = std::make_pair(0.0f, 0.0f);
+	glm::vec2 LastPos = glm::vec2(0, 0);
+	glm::vec2 MouseDelta = glm::vec2(0, 0);
 	bool MouseFirstMoved = true;
 	// ** END TEMPORARY ** // 
 

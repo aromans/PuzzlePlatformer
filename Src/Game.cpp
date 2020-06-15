@@ -95,20 +95,20 @@ void Game::Start()
 
 	// Texture Initialization
 	m_DirtMat = new Material(m_ShaderList[1], "Textures/brick.png", "");
-	m_DirtMat->SetProperties(glm::vec3(0.3f), 0.2f);
+	m_DirtMat->SetProperties(glm::vec3(0.0f), 0.0f);
 
 	m_BrickMat = new Material(m_ShaderList[1], "Textures/dirt.png", "");
 	m_BrickMat->SetProperties(glm::vec3(0.3f), 0.2f);
 
 	// Material Initialization
 	m_DirtCubeMat = new Material(m_ShaderList[1], "Textures/cube.png", "Textures/cube_normal.png");
-	m_DirtCubeMat->SetProperties(glm::vec3(0.3f), 0.2f);
+	m_DirtCubeMat->SetProperties(glm::vec3(0.0f), 0.0f);
 
 	m_TreeMat = new Material(m_ShaderList[1], "Textures/CartoonTree.png", "");
-	m_TreeMat->SetProperties(glm::vec3(0.3f), 0.2f);
+	m_TreeMat->SetProperties(glm::vec3(0.1f), 0.1f);
 
 	m_RoboMat = new Material(m_ShaderList[1], "Textures/Robo.png", "Textures/Robo_normal.png");
-	m_RoboMat->SetProperties(glm::vec3(0.3f), 0.2f);
+	m_RoboMat->SetProperties(glm::vec3(.8f), 1.0f);
 
 	// Primitive Mesh Initialization
 	m_MeshList.push_back(CreateMesh());	 // Pyramid 1
@@ -147,7 +147,7 @@ void Game::Start()
 	tree_locations = { 4, 6, 7, 8, 12, 16, 17 };
 
 	// Camera Initialization
-	m_MainCamera = Camera(glm::vec3(0.0f, 2.f, 4.f), glm::vec3(0.0f, -.6f, -1.1f));
+	m_MainCamera = Camera(glm::vec3(0.0f, 2.f, 4.f), glm::vec3(0.0f, -1.f, -1.1f));
 
 	// Directional Light
 	m_Light = DirectionalLight(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), .3f, .7f);
@@ -180,6 +180,7 @@ void Game::CreateCallBacks()
 {
 	glfwSetKeyCallback(m_MainWindow, HandleKeys);
 	glfwSetCursorPosCallback(m_MainWindow, HandleMouse);
+	glfwSetMouseButtonCallback(m_MainWindow, HandleMouseButton);
 }
 
 // TODO: Create a custom method for User Events -- Handling Input, Engine Wide Events, Etc . . .
@@ -206,12 +207,25 @@ void Game::HandleMouse(GLFWwindow* window, double xPos, double yPos)
 	Game* theGame = static_cast<Game*>(glfwGetWindowUserPointer(window));
 
 	if (theGame->MouseFirstMoved) {
-		theGame->LastPos = std::make_pair(xPos, yPos);
+		theGame->LastPos = glm::vec2(xPos, yPos);
 		theGame->MouseFirstMoved = false;
 	}
 
-	theGame->ChangedPos = std::make_pair(xPos - theGame->LastPos.first, theGame->LastPos.second - yPos);
-	theGame->LastPos = std::make_pair(xPos, yPos);
+	theGame->MouseDelta = glm::vec2((GLfloat)(xPos - theGame->LastPos.x), (GLfloat)(theGame->LastPos.y - yPos));
+	theGame->LastPos = glm::vec2(xPos, yPos);
+}
+
+
+void Game::HandleMouseButton(GLFWwindow* window, int key, int action, int mods)
+{
+	Game* theGame = static_cast<Game*>(glfwGetWindowUserPointer(window));
+
+	if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		theGame->Keys[key] = true;
+	}
+	else {
+		theGame->Keys[key] = false;
+	}
 }
 
 // Utility Function for below Primitives (Pyramid)
@@ -294,6 +308,7 @@ void Game::Update(double dt)
 { 
 	// Camera Controls 
 	m_MainCamera.Move(Keys, dt);
+	m_MainCamera.OnMouseMove(Keys, MouseDelta, LastPos, dt);
 }
 
 // Render Loop
