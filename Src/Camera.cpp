@@ -66,11 +66,16 @@ float lastX = 0.0f;
 void Camera::OnMouseMove(bool* keys, glm::vec2 currPos, glm::vec2 lastPos, double& dt)
 {
 	if (keys[GLFW_MOUSE_BUTTON_LEFT] && currPos.x != lastX && ((currPos.x - lastPos.x) > 1.f || (currPos.x - lastPos.x) < -1.f)) {
-		float angleChange = currPos.x * 15.f * dt;
+		float angleChange = currPos.x * 15.0 * dt;
 		m_Theta -= angleChange;
 	}
 
 	lastX = currPos.x;
+}
+
+void Camera::OnMouseScroll(GLFWwindow* window, double xPos, double yPos)
+{
+	m_Distance -= yPos * 0.6;
 }
 
 glm::mat4 Camera::CalculateViewMatrix()

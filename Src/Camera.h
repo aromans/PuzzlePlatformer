@@ -20,6 +20,7 @@ public:
 
 	void Move(bool* keys, double& dt);
 	void OnMouseMove(bool* keys, glm::vec2 currPos, glm::vec2 lastPos, double& dt);
+	void OnMouseScroll(GLFWwindow* window, double xPos, double yPos);
 
 	glm::vec3 GetPosition() const { return m_Position; }
 
