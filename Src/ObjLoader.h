@@ -65,9 +65,6 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 	std::vector<glm::vec3> tangents;
 	std::vector<glm::vec3> bitangents;
 
-	// Face Information
-	std::vector<std::tuple<GLint, GLint, GLint>> obj_faces;
-
 	// Vertex Array
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -148,37 +145,6 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 				v2.normal = vertex_normals[std::get<2>(faces[2]) - 1];
 
 				DealWithSet(v0, v1, v2, vertices, tangents, bitangents);
-
-				// Tri 1
-				//obj_faces.push_back(faces[0]);
-				//obj_faces.push_back(faces[1]);
-				//obj_faces.push_back(faces[2]);
-
-				//glm::vec3& v0 = vertex_positions[std::get<0>(faces[0]) - 1];
-				//glm::vec3& v1 = vertex_positions[std::get<0>(faces[1]) - 1];
-				//glm::vec3& v2 = vertex_positions[std::get<0>(faces[2]) - 1];
-
-				//glm::vec2& uv0 = vertex_texcoords[std::get<1>(faces[0]) - 1];
-				//glm::vec2& uv1 = vertex_texcoords[std::get<1>(faces[1]) - 1];
-				//glm::vec2& uv2 = vertex_texcoords[std::get<1>(faces[2]) - 1];
-
-				//glm::vec3 deltaPos1 = v1 - v0;
-				//glm::vec3 deltaPos2 = v2 - v0;
-
-				//glm::vec2 deltaUV1 = uv1 - uv0;
-				//glm::vec2 deltaUV2 = uv2 - uv0;
-
-				//float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-				//glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-				//glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
-				//tangents.push_back(tangent);
-				//tangents.push_back(tangent);
-				//tangents.push_back(tangent);
-
-				//bitangents.push_back(bitangent);
-				//bitangents.push_back(bitangent);
-				//bitangents.push_back(bitangent);
 			}
 		}
 	}
@@ -217,8 +183,23 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 		}
 	}
 
-	for (int i = 0; i < out_vertices.size(); ++i) {
+	for (int i = 0; i < indices.size(); i += 3) {
+		unsigned int in0 = indices[i + 0];
+		unsigned int in1 = indices[i + 1];
+		unsigned int in2 = indices[i + 2];
 
+		glm::vec3 v1 = out_vertices[in1].position - out_vertices[in0].position;
+		glm::vec3 v2 = out_vertices[in2].position - out_vertices[in0].position;
+		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
+
+		out_vertices[in0].normal += normal;
+		out_vertices[in1].normal += normal;
+		out_vertices[in2].normal += normal;
+	}
+
+	for (int i = 0; i < out_vertices.size(); ++i) {
+		out_vertices[i].normal = glm::normalize(out_vertices[i].normal);
 		out_vertices[i].averagedTangent = glm::normalize(indexed_tangents[i]);
 		out_vertices[i].averagedBitangent = glm::normalize(indexed_bitangents[i]);
 
@@ -226,13 +207,13 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 		glm::vec3& t = out_vertices[i].averagedTangent;
 		glm::vec3& b = out_vertices[i].averagedBitangent;
 
-		t = glm::normalize(t - n * glm::dot(n, t));
+		t = glm::normalize(t - glm::dot(t, n) * n);
 
-		b = glm::normalize(glm::cross(t, n));
-
-		if (glm::dot(glm::cross(t, b), n) < 0.0f) {
+		if (glm::dot(glm::cross(n, t), b) < 0.0f) {
 			t = t * -1.0f;
 		}
+
+		b = glm::normalize(glm::cross(t, n));
 	}
 
 	printf("OBJ file was successfully loaded! Number of Vertices (%i) and Indices (%i)\n", out_vertices.size(), indices.size());
