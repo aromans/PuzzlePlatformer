@@ -9,7 +9,8 @@ PointLight::PointLight() : Light()
 }
 
 PointLight::PointLight(glm::vec3 position, GLfloat con, GLfloat lin, GLfloat exp,
-	glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) : Light(ambientColor, ambientIntesnity, diffuseIntensity)
+	glm::vec3 ambientColor, GLfloat ambientIntesnity, GLfloat diffuseIntensity) 
+	: Light(1024, 1024, ambientColor, ambientIntesnity, diffuseIntensity)
 {
 	m_Position = position;
 	m_Constant = con;
@@ -22,8 +23,6 @@ PointLight::~PointLight() { }
 void PointLight::SendToShader(Shader& shader, const int& i)
 {
 	std::string prefix = "pointLights[" + std::to_string(i) + "].";
-
-	shader.SetVec3f(m_Position, ("pointLightPositions[" + std::to_string(i) + "]").c_str());
 
 	// Point Light Settings
 	shader.SetVec3f(m_Position, (prefix + "position").c_str());

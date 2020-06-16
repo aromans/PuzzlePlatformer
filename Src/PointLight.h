@@ -13,6 +13,8 @@ public:
 	virtual void SendToShader(Shader& shader, const int& i);
 	virtual void SendToShader(Shader& shader);
 
+	glm::vec3 GetPosition() const { return m_Position; }
+
 protected:
 	glm::vec3 m_Position;
 
