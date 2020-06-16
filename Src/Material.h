@@ -15,7 +15,7 @@ public:
 	~Material() {}
 
 	void SetProperties(glm::vec3 specular, GLfloat shininess);
-	void AssignMaterial();
+	void AssignMaterial(bool pass);
 
 private:
 

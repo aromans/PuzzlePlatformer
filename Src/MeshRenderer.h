@@ -16,7 +16,7 @@ public:
 
 	void CreateMesh(Mesh* mesh, Material* material);
 	void CreateMesh(GLfloat *vertices, unsigned int *indices, unsigned int num_of_vertices, unsigned int num_of_indices, Material* material);
-	void Render();
+	void Render(bool pass);
 	void Clear();
 
 	Mesh* GetMesh() const { return m_Mesh; }

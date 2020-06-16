@@ -63,16 +63,6 @@ void MeshRenderer::CreateMesh(Mesh* mesh, Material* material)
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, mesh->VerticesSize(), &mesh->Vertices()[0], GL_STATIC_DRAW);
 
-	// Generate and Bind Tangent Buffer
-	//glGenBuffers(1, &m_TangentBuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_TangentBuffer);
-	//glBufferData(GL_ARRAY_BUFFER, mesh->TangentsSize(), &mesh->Tangents()[0], GL_STATIC_DRAW);
-
-	//// Generate and Bind Bitangent Buffer
-	//glGenBuffers(1, &m_BitangentBuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_BitangentBuffer);
-	//glBufferData(GL_ARRAY_BUFFER, mesh->BitangentsSize(), &mesh->Bitangents()[0], GL_STATIC_DRAW);
-
 	// Vertex Attributes
 	mesh->AssignAttributes(0, 3, (GLvoid*)offsetof(Vertex, position));
 	// UV Coordinate Attributes
@@ -94,9 +84,9 @@ void MeshRenderer::CreateMesh(Mesh* mesh, Material* material)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void MeshRenderer::Render()
+void MeshRenderer::Render(bool pass)
 {
-	m_Material->AssignMaterial();
+	m_Material->AssignMaterial(pass);
 
 	glBindVertexArray(m_VAO);
 

@@ -54,8 +54,14 @@ private:
 	//	return changed;
 	//}
 
+	// TODO: Refactor into appropriate class . . . 
+	void DirectionalShadowMapPass(DirectionalLight* light, Shader* shader);
+	void RenderScene(Shader* shader, bool pass);
+	void RenderPass(Shader* shader);
+
 	static void HandleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 	static void HandleMouse(GLFWwindow* window, double xPos, double yPos);
+	static void HandleMouseScroll(GLFWwindow* window, double xPos, double yPos);
 	static void HandleMouseButton(GLFWwindow* window, int button, int action, int mods);
 	// ** END TEMPORARY ** // 
 
@@ -64,7 +70,9 @@ public:
 	// ** Temporary User Input Variables ** //
 	bool Keys[1024];
 	glm::vec2 LastPos = glm::vec2(0, 0);
+	glm::vec2 LastScrollAmnt = glm::vec2(0, 0);
 	glm::vec2 MouseDelta = glm::vec2(0, 0);
+	glm::vec2 MouseScrollDelta = glm::vec2(0, 0);
 	bool MouseFirstMoved = true;
 	// ** END TEMPORARY ** // 
 
@@ -74,7 +82,9 @@ private:
 	GLint m_BufferWidth, m_BufferHeight;
 
 	bool m_IsRunning;
+
 	glm::mat4 proj;
+	glm::mat4 ortho;
 
 	// Scene Lighting
 	DirectionalLight m_Light;
@@ -84,6 +94,8 @@ private:
 	Mesh* m_DirtCube;
 	Mesh* m_Tree;
 	Mesh* m_Robo;
+	Mesh* m_PineTree_Leaves;
+	Mesh* m_PineTree_Bark;
 
 	// Not Needed
 	Material* m_DirtMat;
@@ -91,8 +103,12 @@ private:
 	Material* m_DirtCubeMat;
 	Material* m_TreeMat;
 	Material* m_RoboMat;
+	Material* m_PineTreeLeavesMat;
+	Material* m_PineTreeBarkMat;
 
 	// Scene Meshses && Shaders
 	std::vector<MeshRenderer*> m_MeshList;
 	std::vector<Shader*> m_ShaderList;
+
+	Shader m_DirectionalShadowShader;
 };

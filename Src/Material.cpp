@@ -35,14 +35,15 @@ void Material::SetProperties(glm::vec3 specular, GLfloat shininess)
 	m_Shininess = shininess;
 }
 
-void Material::AssignMaterial()
+void Material::AssignMaterial(bool pass)
 {
-	ApplyUniforms();
+	if (pass == false) {
+		ApplyUniforms();
+		m_Shader->Use();
 
-	m_Shader->Use();
-
-	m_Diffuse.UseTexture(0);
-	m_Normal.UseTexture(1);
+		m_Diffuse.UseTexture(0);
+		m_Normal.UseTexture(1);	
+	}
 }
 
 void Material::ApplyUniforms()
