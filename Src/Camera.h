@@ -24,9 +24,7 @@ public:
 
 	glm::vec3 GetPosition() const { return m_Position; }
 
-	GLfloat DistanceFromTarget() const {
-		return m_Distance;
-	}
+	inline GLdouble DistanceFromTarget() const { return m_Distance; }
 
 	glm::mat4 CalculateViewMatrix();
 
@@ -38,8 +36,8 @@ private:
 	glm::vec3 m_Position;
 	glm::vec3 m_TargetPosition;
 	glm::vec3 m_Direction;
-	GLfloat m_Distance;
-	GLfloat m_Theta;
+	GLdouble m_Distance;
+	GLdouble m_Theta;
 
 	// Local Positions for Camera Orientation
 	glm::vec3 m_Front;

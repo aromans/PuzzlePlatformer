@@ -28,7 +28,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
 	m_Front = glm::vec3(0.0f, 0.0f, -1.0f);
 	m_WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	m_Distance = (GLfloat)(glm::length(m_Direction));
+	m_Distance = (GLdouble)(glm::length(m_Direction));
 
 	CalculateLocalPosition();
 }
@@ -66,7 +66,7 @@ float lastX = 0.0f;
 void Camera::OnMouseMove(bool* keys, glm::vec2 currPos, glm::vec2 lastPos, double& dt)
 {
 	if (keys[GLFW_MOUSE_BUTTON_LEFT] && currPos.x != lastX && ((currPos.x - lastPos.x) > 1.f || (currPos.x - lastPos.x) < -1.f)) {
-		float angleChange = currPos.x * 15.0 * dt;
+		double angleChange = currPos.x * 15.0 * dt;
 		m_Theta -= angleChange;
 	}
 

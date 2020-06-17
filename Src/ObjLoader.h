@@ -160,7 +160,7 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 
 	std::vector<Vertex> out_vertices;
 
-	for (int i = 0; i < vertices.size(); ++i)
+	for (size_t i = 0; i < vertices.size(); ++i)
 	{
 		Vertex v = vertices[i];
 
@@ -183,23 +183,23 @@ static std::tuple<std::vector<Vertex>, std::vector<unsigned int>> LoadOBJ(const 
 		}
 	}
 
-	for (int i = 0; i < indices.size(); i += 3) {
-		unsigned int in0 = indices[i + 0];
-		unsigned int in1 = indices[i + 1];
-		unsigned int in2 = indices[i + 2];
+	//for (int i = 0; i < indices.size(); i += 3) {
+	//	unsigned int in0 = indices[i + 0];
+	//	unsigned int in1 = indices[i + 1];
+	//	unsigned int in2 = indices[i + 2];
 
-		glm::vec3 v1 = out_vertices[in1].position - out_vertices[in0].position;
-		glm::vec3 v2 = out_vertices[in2].position - out_vertices[in0].position;
-		glm::vec3 normal = glm::cross(v1, v2);
-		normal = glm::normalize(normal);
+	//	glm::vec3 v1 = out_vertices[in1].position - out_vertices[in0].position;
+	//	glm::vec3 v2 = out_vertices[in2].position - out_vertices[in0].position;
+	//	glm::vec3 normal = glm::cross(v1, v2);
+	//	normal = glm::normalize(normal);
 
-		out_vertices[in0].normal += normal;
-		out_vertices[in1].normal += normal;
-		out_vertices[in2].normal += normal;
-	}
+	//	out_vertices[in0].normal += normal;
+	//	out_vertices[in1].normal += normal;
+	//	out_vertices[in2].normal += normal;
+	//}
 
-	for (int i = 0; i < out_vertices.size(); ++i) {
-		out_vertices[i].normal = glm::normalize(out_vertices[i].normal);
+	for (size_t i = 0; i < out_vertices.size(); ++i) {
+		//out_vertices[i].normal = glm::normalize(out_vertices[i].normal);
 		out_vertices[i].averagedTangent = glm::normalize(indexed_tangents[i]);
 		out_vertices[i].averagedBitangent = glm::normalize(indexed_bitangents[i]);
 
