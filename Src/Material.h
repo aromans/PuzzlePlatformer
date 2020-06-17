@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Shader.h"
 #include "Texture.h"
+#include "Renderer/Shader.h"
 
 #include <glm\glm.hpp>
 #include <string>
@@ -20,7 +20,6 @@ public:
 private:
 
 	void ApplyUniforms();
-	//void SendToShader(Shader& shader);
 
 private:
 	Shader* m_Shader;

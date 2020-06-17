@@ -1,12 +1,5 @@
 #include "Material.h"
 
-//void Material::SendToShader(Shader& shader)
-//{
-//	shader.SetVec3f(m_Ambient, "material.ambient");
-//	shader.SetVec3f(m_Diffuse, "material.diffuse");
-//	shader.SetVec3f(m_Specular, "material.specular");
-//}
-
 Material::Material(Shader* shader, std::string diffuse_tex, std::string normal_tex)
 {
 	if (shader != nullptr) {
@@ -39,7 +32,7 @@ void Material::AssignMaterial(bool pass)
 {
 	if (pass == false) {
 		ApplyUniforms();
-		m_Shader->Use();
+		m_Shader->Bind();
 
 		m_Diffuse.UseTexture(0);
 		m_Normal.UseTexture(1);	
@@ -53,5 +46,4 @@ void Material::ApplyUniforms()
 	m_Shader->SetVec3f(m_Specular, "material.specular");
 	m_Shader->Set1f(m_Shininess, "material.shininess");
 	m_Shader->Set1i(m_NormalTex != "", "material.has_normal_map");
-
 }
