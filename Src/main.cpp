@@ -3,7 +3,7 @@
 #include "Constants.h"
 
 int main(int argc, char *args[]) {
-	Game* game = new Game();
+	Engine::Game* game = new Engine::Game();
 
 	// Initialize the Game 
 	if (!game->Initialize()) return 1;
