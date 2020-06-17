@@ -19,6 +19,8 @@ out VS_OUT
 	vec3 v_Position;
 	vec3 v_Normal;
 	vec2 v_TexCoord;
+
+	mat3 TBN;
 } vs_out;
 
 out vec4 DirectionalLightSpacePos;
@@ -26,6 +28,7 @@ out vec4 DirectionalLightSpacePos;
 uniform mat4 MVP;
 uniform mat4 V;
 uniform mat4 M;
+uniform mat4 NormalMatrix;	// transpose(inverse(M))
 uniform mat4 directionalLightTransform;
 uniform vec3 cameraPos;
 
@@ -35,9 +38,15 @@ void main()
 
 	vs_out.v_Position = (M * vec4(pos, 1.0)).xyz;
 
-	vs_out.v_Normal = mat3(transpose(inverse(M))) * normal;
+	vs_out.v_Normal = mat3(NormalMatrix) * normal;
 
 	vs_out.v_TexCoord = texcoord;
+
+	vec3 N = normalize((NormalMatrix * vec4(normal, 0.0)).xyz);
+	vec3 T = normalize((NormalMatrix * vec4(tangent, 0.0)).xyz);
+	vec3 B = normalize((NormalMatrix * vec4(bitangent, 0.0)).xyz);
+
+	vs_out.TBN = mat3(T, B, N);
 
 	DirectionalLightSpacePos = directionalLightTransform * M * vec4(pos, 1.0);
 }

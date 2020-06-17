@@ -45,9 +45,11 @@ struct Material
 
 in VS_OUT
 {
-	vec3 v_Position;
-	vec3 v_Normal;
-	vec2 v_TexCoord;
+	vec3 v_Position;	// World
+	vec3 v_Normal;		// World
+	vec2 v_TexCoord;	// World
+	
+	mat3 TBN;			// Tangent Space
 } fs_in;
 
 in vec4 DirectionalLightSpacePos;
@@ -105,6 +107,10 @@ float CalcDirectionalShadowFactor(vec3 direction, vec3 normal)
 	return shadow;
 }
 
+//if (dot(toEyePos, normalize(normal)) <  dot(normalize(direction), normalize(normal)) * 0.5) {
+//			return vec4(0.0, 0.0, 0.0, 1.0);
+//} 
+
 vec4 CalcLight(Light light, vec3 direction, vec3 normal, float shadowFactor)
 {
 	vec4 ambientColor = vec4(light.color, 1.0) * light.ambientIntensity;
@@ -122,12 +128,15 @@ vec4 CalcLight(Light light, vec3 direction, vec3 normal, float shadowFactor)
 		vec3 reflection = normalize(reflect(-normalize(direction), normalize(normal)));
 
 		float specularFactor = dot(reflection, toEyePos);
-
-		if (specularFactor > 0.0)
+		
+		if (dot(toEyePos, normalize(normal)) <  mix(0.05, 0.3, dot(normalize(direction), normalize(normal)))) {
+			return vec4(0.0, 0.0, 0.0, 1.0);
+		} 
+		else if (specularFactor > 0.0)
 		{
 			specularFactor = pow(specularFactor, material.shininess);
 			specularColor = vec4(light.color * material.specular * specularFactor, 1.0);
-		}
+		} 
 	}
 
 	return (ambientColor + ((1.0 - shadowFactor) * (diffuseColor + specularColor)));
@@ -161,23 +170,21 @@ vec4 CalcSpotLight(SpotLight light, vec3 normal)
 	}
 }
 
-/*
+
 vec3 CalcNewNormal()
 {
-	vec3 NewNormal;
-	if (material.has_normal_map != 0) {
-		vec3 BumpMapNormal = (texture(material.normal, fs_in.v_TexCoord)).rgb;
-		BumpMapNormal = BumpMapNormal * 2.0 - 1.0;
-		NewNormal = normalize(fs_in.TBN * BumpMapNormal);
-	} else {
-		NewNormal = fs_in.v_PassedNormal;
-	}
+	if (material.has_normal_map == 0) return fs_in.v_Normal;
+
+	vec3 NewNormal = texture( material.normal, fs_in.v_TexCoord ).rgb;
+	NewNormal = normalize(NewNormal * 2.0 - 1.0);
+	NewNormal = normalize(fs_in.TBN * NewNormal);	// Converts to World
+
 	return NewNormal;
-}*/
+}
 
 void main()
 {
-	vec3 Normal = fs_in.v_Normal; //CalcNewNormal();
+	vec3 Normal = CalcNewNormal();
 
 	float shadowFactor = CalcDirectionalShadowFactor(directionalLight.direction, Normal);
 
