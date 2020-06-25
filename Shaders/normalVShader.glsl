@@ -5,14 +5,11 @@ layout (location = 1) in vec2 texcoord;
 layout (location = 2) in vec3 normal;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec3 bitangent;
+layout (location = 5) in ivec4 jointIds;
+layout (location = 6) in vec4 weights;
 
-/*out vec3 v_Position;
-out vec3 v_Normal;
-out vec3 v_Tangent;
-out vec3 v_Bitangent;
-out vec3 v_PassedNormal;
-
-out vec3 E;*/
+const int MAX_JOINTS = 150;
+const int MAX_WEIGHT_JOINTS = 4;
 
 out VS_OUT
 {
@@ -32,21 +29,47 @@ uniform mat4 NormalMatrix;	// transpose(inverse(M))
 uniform mat4 directionalLightTransform;
 uniform vec3 cameraPos;
 
+uniform int IsAnimated;
+
+uniform mat4 BindShapeMatrix;
+uniform mat4 JointTransforms[MAX_JOINTS];
+
 void main()
 {
-	gl_Position = MVP * vec4(pos, 1.0);
+	vec4 localPosition;
+	vec4 localNormal;
+	vec4 localTangent;
+	vec4 localBitangent;
+	if (IsAnimated == 1) {
+		mat4 boneTransform = JointTransforms[jointIds[0]] * weights[0];
+		boneTransform += JointTransforms[jointIds[1]] * weights[1];
+		boneTransform += JointTransforms[jointIds[2]] * weights[2];
+		boneTransform += JointTransforms[jointIds[3]] * weights[3];
+		localPosition = boneTransform * vec4(pos, 1.0);
+		localNormal = boneTransform * vec4(normal, 0.0);
+		localTangent = boneTransform * vec4(tangent, 0.0);
+		localBitangent = boneTransform * vec4(bitangent, 0.0);
+	} else {
+		localPosition = vec4(pos, 1.0);
+		localNormal = vec4(normal, 0.0);
+		localTangent = vec4(tangent, 0.0);
+		localBitangent = vec4(bitangent, 0.0);
+	}
 
-	vs_out.v_Position = (M * vec4(pos, 1.0)).xyz;
 
-	vs_out.v_Normal = mat3(NormalMatrix) * normal;
+	gl_Position = MVP * localPosition;
+
+	vs_out.v_Position = (M * localPosition).xyz;
+
+	vs_out.v_Normal = mat3(NormalMatrix) * localNormal.xyz;
 
 	vs_out.v_TexCoord = texcoord;
 
-	vec3 N = normalize((NormalMatrix * vec4(normal, 0.0)).xyz);
-	vec3 T = normalize((NormalMatrix * vec4(tangent, 0.0)).xyz);
-	vec3 B = normalize((NormalMatrix * vec4(bitangent, 0.0)).xyz);
+	vec3 N = normalize((NormalMatrix * localNormal).xyz);
+	vec3 T = normalize((NormalMatrix * localTangent).xyz);
+	vec3 B = normalize((NormalMatrix * localBitangent).xyz);
 
 	vs_out.TBN = mat3(T, B, N);
 
-	DirectionalLightSpacePos = directionalLightTransform * M * vec4(pos, 1.0);
+	DirectionalLightSpacePos = directionalLightTransform * M * localPosition;
 }
