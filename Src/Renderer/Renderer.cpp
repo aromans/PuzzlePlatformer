@@ -9,9 +9,14 @@ namespace Engine {
 	void Renderer::Submit(const VAO& vertexArray)
 	{
 		vertexArray.Bind();
-		vertexArray.GetIBO()->Bind();
-		OpenGLRenderer::DrawIndexed(vertexArray);
-		vertexArray.GetIBO()->Unbind();
+		if (vertexArray.GetIBO() != nullptr) {
+			vertexArray.GetIBO()->Bind();
+			OpenGLRenderer::DrawIndexed(vertexArray);
+			vertexArray.GetIBO()->Unbind();
+		}
+		else {
+			OpenGLRenderer::DrawVertices(vertexArray);
+		}
 		vertexArray.Unbind();
 	}
 

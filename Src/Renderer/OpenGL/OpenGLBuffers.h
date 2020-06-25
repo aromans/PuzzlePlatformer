@@ -18,9 +18,11 @@ namespace Engine {
 		virtual void AddAttributes(const std::vector<BufferElement>& elements) { m_Elements = elements; }
 		const std::vector<BufferElement>& GetBufferElements() const override { return m_Elements; }
 
+		virtual size_t GetCount() const { return m_Count; }
 	private:
 		unsigned int m_VBO;
 		std::vector<BufferElement> m_Elements;
+		size_t m_Count;
 	};
 
 	class OpenGLIBO : public IBO

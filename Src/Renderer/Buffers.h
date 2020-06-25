@@ -1,5 +1,7 @@
 #pragma once
 
+#include <gl/glew.h>
+
 #include <vector>
 
 namespace Engine {
@@ -8,8 +10,10 @@ namespace Engine {
 		const void* Offset;
 		int Count;
 		int Size;
+		GLenum Type;
 
-		BufferElement(int count, int size, const void* offset) : Count(count), Size(size), Offset(offset) {}
+		BufferElement(int count, int size, const void* offset) : Count(count), Size(size), Offset(offset), Type(GL_FLOAT) {}
+		BufferElement(int count, int size, const void* offset, GLenum type) : Count(count), Size(size), Offset(offset), Type(type) {}
 	};
 
 	class VBO
@@ -22,6 +26,8 @@ namespace Engine {
 
 		virtual void AddAttributes(const std::vector<BufferElement>& elements) = 0;
 		virtual const std::vector<BufferElement>& GetBufferElements() const = 0;
+
+		virtual size_t GetCount() const = 0;
 
 		static VBO* Create(const void* data, size_t size);
 	};

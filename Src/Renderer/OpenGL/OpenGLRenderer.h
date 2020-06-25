@@ -25,6 +25,10 @@ namespace Engine {
 			glDrawElements(GL_TRIANGLES, vertexArray.GetIBO()->GetCount(), GL_UNSIGNED_INT, (void*)0);
 		}
 
+		inline static void DrawVertices(const VAO& vertexArray) {
+			glDrawArrays(GL_TRIANGLES, 0, vertexArray.GetVBOs()[0]->GetCount());
+		}
+
 		GLFWwindow* GetWindow() const { return m_WindowHandle; }
 
 	private:

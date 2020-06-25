@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-	OpenGLVBO::OpenGLVBO(const void* data, size_t size)
+	OpenGLVBO::OpenGLVBO(const void* data, size_t size) : m_Count(size)
 	{
 		glCreateBuffers(1, &m_VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);

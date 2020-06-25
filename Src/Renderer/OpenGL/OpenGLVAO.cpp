@@ -35,7 +35,11 @@ namespace Engine {
 		for (size_t i = 0; i < layout.size(); ++i)
 		{
 			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, layout[i].Count, GL_FLOAT, GL_FALSE, layout[i].Size, layout[i].Offset);
+
+			if (layout[i].Type == GL_FLOAT)
+				glVertexAttribPointer(i, layout[i].Count, GL_FLOAT, GL_FALSE, layout[i].Size, layout[i].Offset);
+			else if (layout[i].Type == GL_INT)
+				glVertexAttribIPointer(i, layout[i].Count, GL_INT, layout[i].Size, layout[i].Offset);
 		}
 
 		m_VertexBuffer.push_back(&vbo);
