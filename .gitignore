@@ -2,6 +2,8 @@
 **/bin/
 bin-int/
 Debug/
+Release/
+x64/
 
 # Game files
 *.log
