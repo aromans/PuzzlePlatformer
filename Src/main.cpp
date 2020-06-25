@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "Constants.h"
 
-int main(int argc, char *args[]) {
+ int main(int argc, char *args[]) {
 	Engine::Game* game = new Engine::Game();
 
 	// Initialize the Game 

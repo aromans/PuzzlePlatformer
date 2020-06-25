@@ -14,15 +14,17 @@ namespace Engine {
 	class Model
 	{
 	public:
+		Model() {}
 		Model(std::string obj_path, std::string albedo, std::string normal, Shader* shader);
-		~Model();
+		virtual ~Model();
 
-		void Render(bool& pass);
+		virtual void Render(bool& pass);
 
-	protected:
+	private:
 		std::unique_ptr<VAO> m_VertexArray;
 		Material* m_Material;
 		Mesh* m_Mesh;
+		Shader* m_Shader;
 	};
 
 }
