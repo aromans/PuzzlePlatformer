@@ -12,6 +12,8 @@
 #include "ObjLoader.h"
 #include "Mesh.h"
 #include "Model.h"
+#include ".\Animation\AnimationModel.h"
+#include ".\Animation\Animator.h"
 
 #include <GLFW\glfw3.h>
 #include <glm\glm.hpp>
@@ -86,6 +88,8 @@ namespace Engine {
 		DirectionalLight m_Light;
 		std::vector<PointLight> m_PointLights;
 		std::vector<SpotLight> m_SpotLights;
+
+		AnimationModel* toon;
 
 		std::vector<Model*> m_Models;
 

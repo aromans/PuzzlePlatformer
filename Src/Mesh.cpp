@@ -1,16 +1,26 @@
 #include "Mesh.h"
 
-Mesh::Mesh()
-{
-	m_Vertices = {};
-	m_Indices = {};
-}
+namespace Engine {
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
-{
-	m_Vertices = vertices;
-	m_Indices = indices;
-}
+	Mesh::Mesh()
+	{
+		m_Vertices = {};
+		m_Indices = {};
+	}
 
-Mesh::~Mesh() { 
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+	{
+		m_Vertices = vertices;
+		m_Indices = indices;
+	}
+
+	Mesh::Mesh(const std::vector<AnimVertex>& vertices, const std::vector<unsigned int>& indices)
+	{
+		m_AnimVertices = vertices;
+		m_Indices = indices;
+	}
+
+	Mesh::~Mesh() {
+	}
+
 }

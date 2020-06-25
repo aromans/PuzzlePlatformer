@@ -4,6 +4,9 @@
 
 #include "Renderer/Renderer.h"
 
+#include ".\Animation\DaeLoader.h"
+#include ".\Animation\ColladaImporter.h"
+
 #include <stdio.h>
 #include <cmath>
 #include <string>
@@ -84,7 +87,7 @@ namespace Engine {
 
 		// Calculate Projection Matrix
 		GLfloat aspectRatio = (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight;
-		proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+		proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f);
 		ortho = glm::ortho(-aspectRatio, aspectRatio, -20.0f, 20.0f, 0.01f, 100.0f);
 		/*proj = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, 0.0f, 1000.0f);
 		proj = glm::scale(proj, glm::vec3(0.55f, 0.55f, 0.55f));*/
@@ -109,7 +112,10 @@ namespace Engine {
 		m_Models.push_back(new Model("ObjFiles/DirtCube.obj", "Textures/cube.png", "Textures/cube_normal.png", m_ShaderList[1]));
 		m_Models.push_back(new Model("ObjFiles/PineTree_Leaves.obj", "Textures/leafs_d.png", "", m_ShaderList[1]));
 		m_Models.push_back(new Model("ObjFiles/PineTree_Bark.obj", "Textures/bark_d.png", "", m_ShaderList[1]));
-		m_Models.push_back(new Model("ObjFiles/Slimer.obj", "Textures/AlbedoSlimer.png", "Textures/NormalSlimer.png", m_ShaderList[1]));
+
+		//ImportColladaFile("ObjFiles/Slimer-Look.dae");
+
+		toon = new AnimationModel("ObjFiles/Slimer-Look2.dae", "Textures/AlbedoSlimer.png", "Textures/NormalSlimer.png", m_ShaderList[1]);
 
 		lvl_height = 3; lvl_width = 3;
 		tree_locations = { 8 };// 4, 6, 7, 8, 12, 16, 17 };
@@ -196,13 +202,14 @@ namespace Engine {
 		float z = 0.0f;
 
 		// Character Model Render for 5x5 level
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.1, -1.5f, z));
-		mvp = proj * view * model;
-		shader->SetMat4f(model, "M");
-		shader->SetMat4f(glm::transpose(glm::inverse(model)), "NormalMatrix");
-		shader->SetMat4f(mvp, "MVP");
-		m_Models[3]->Render(pass);
+		//model = glm::mat4(1.0f);
+		////model = glm::translate(model, glm::vec3(1.1, -1.f, z));
+		//model = glm::scale(model, glm::vec3(.01f, .01f, .01f));
+		//mvp = proj * view * model;
+		//shader->SetMat4f(model, "M");
+		//shader->SetMat4f(glm::transpose(glm::inverse(model)), "NormalMatrix");
+		//shader->SetMat4f(mvp, "MVP");
+		toon->Render(pass, proj, view);
 
 		// 5x5 Level Render
 		for (int i = 0; i < lvl_height * lvl_width; ++i) {
@@ -342,6 +349,8 @@ namespace Engine {
 	// Update Loop
 	void Game::Update(double dt)
 	{
+		toon->Update(dt);
+
 		// Camera Controls 
 		m_MainCamera.Move(Keys, dt);
 		m_MainCamera.OnMouseMove(Keys, MouseDelta, LastPos, dt);
