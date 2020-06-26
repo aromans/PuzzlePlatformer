@@ -107,15 +107,11 @@ namespace Engine {
 
 		m_DirectionalShadowShader = Shader("Shaders/vDirectionalShadowMap.glsl", "Shaders/fDirectionalShadowMap.glsl");
 
-		//m_MeshList.push_back(CreateFloor()); // Floor
-
 		m_Models.push_back(new Model("ObjFiles/DirtCube.obj", "Textures/cube.png", "Textures/cube_normal.png", m_ShaderList[1]));
 		m_Models.push_back(new Model("ObjFiles/PineTree_Leaves.obj", "Textures/leafs_d.png", "", m_ShaderList[1]));
 		m_Models.push_back(new Model("ObjFiles/PineTree_Bark.obj", "Textures/bark_d.png", "", m_ShaderList[1]));
 
-		//ImportColladaFile("ObjFiles/Slimer-Look.dae");
-
-		toon = new AnimationModel("ObjFiles/Slimer-Look2.dae", "Textures/AlbedoSlimer.png", "Textures/NormalSlimer.png", m_ShaderList[1]);
+		toon = new AnimationModel("ObjFiles/Slime.dae", "ObjFiles/Slime-taunt.dae", "Textures/AlbedoSlimer.png", "Textures/NormalSlimer.png", m_ShaderList[1]);
 
 		lvl_height = 3; lvl_width = 3;
 		tree_locations = { 8 };// 4, 6, 7, 8, 12, 16, 17 };
@@ -186,15 +182,6 @@ namespace Engine {
 		glm::mat4 view = m_MainCamera.CalculateViewMatrix();
 		glm::mat4 mvp;
 
-		// Floor Model - Keeping for now...
-		//model = glm::mat4(1.0f);
-		//model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
-		//mvp = proj * view * model;
-		//shader->SetMat4f(model, "M");
-		//shader->SetMat4f(glm::transpose(glm::inverse(model)), "NormalMatrix");
-		//shader->SetMat4f(mvp, "MVP");
-		//m_MeshList[2]->Render(pass);
-
 		int start = 6;
 		float increment = -1.1f;
 		float size = -(lvl_width / 2) - (0.1f * (lvl_width / 2));
@@ -202,14 +189,14 @@ namespace Engine {
 		float z = 0.0f;
 
 		// Character Model Render for 5x5 level
-		//model = glm::mat4(1.0f);
-		////model = glm::translate(model, glm::vec3(1.1, -1.f, z));
-		//model = glm::scale(model, glm::vec3(.01f, .01f, .01f));
-		//mvp = proj * view * model;
-		//shader->SetMat4f(model, "M");
-		//shader->SetMat4f(glm::transpose(glm::inverse(model)), "NormalMatrix");
-		//shader->SetMat4f(mvp, "MVP");
-		toon->Render(pass, proj, view);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(1.1, -1.f, z));
+		model = glm::scale(model, glm::vec3(.01f, .01f, .01f));
+		mvp = proj * view * model;
+		shader->SetMat4f(model, "M");
+		shader->SetMat4f(glm::transpose(glm::inverse(model)), "NormalMatrix");
+		shader->SetMat4f(mvp, "MVP");
+		toon->Render(pass);
 
 		// 5x5 Level Render
 		for (int i = 0; i < lvl_height * lvl_width; ++i) {
@@ -294,6 +281,16 @@ namespace Engine {
 				theGame->Keys[key] = false;
 			}
 		}
+
+		if (key == GLFW_KEY_1 && action == GLFW_RELEASE) {
+			theGame->toon->PlayAnimation("LookAround");
+		}
+		else if (key == GLFW_KEY_2 && action == GLFW_RELEASE) {
+			theGame->toon->PlayAnimation("LookCute");
+		}
+		else if (key == GLFW_KEY_0 && action == GLFW_RELEASE) {
+			theGame->toon->StopAnimation();
+		}
 	}
 
 	void Game::HandleMouse(GLFWwindow* window, double xPos, double yPos)
@@ -327,24 +324,6 @@ namespace Engine {
 			theGame->Keys[key] = false;
 		}
 	}
-
-	//MeshRenderer* Game::CreateFloor()
-	//{
-	//	unsigned int floorIndices[] = {
-	//		0, 2, 1,
-	//		1, 2, 3
-	//	};
-	//	GLfloat floorVertices[] = {
-	//		-10.0f, 0.0f, -10.0f,	 0.0f,  0.0f,	0.0f, 1.0f, 0.0f,
-	//		 10.0f, 0.0f, -10.0f,   10.0f,  0.0f,	0.0f, 1.0f, 0.0f,
-	//		-10.0f, 0.0f,  10.0f,	 0.0f, 10.0f,	0.0f, 1.0f, 0.0f,
-	//		 10.0f, 0.0f,  10.0f,	10.0f, 10.0f,	0.0f, 1.0f, 0.0f
-	//	};
-	//	MeshRenderer* floor = new MeshRenderer();
-	//	floor->CreateMesh(floorVertices, floorIndices, 32, 6, m_DirtMat);
-	//	//m_MeshList.push_back(floor);
-	//	return floor;
-	//}
 
 	// Update Loop
 	void Game::Update(double dt)

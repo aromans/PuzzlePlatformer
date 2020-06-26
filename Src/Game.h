@@ -39,9 +39,6 @@ namespace Engine {
 		void Update(double dt);
 		void Render();
 
-		void CalculateAverageNormals(unsigned int* indices, unsigned int indexCount, GLfloat* vertices,
-			unsigned int vertexCount, unsigned int vLength, unsigned int normalOffset);
-
 		bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindow); }
 
 	private:
