@@ -10,7 +10,6 @@ namespace Engine {
 	public:
 		Animation();
 		Animation(const float& length, const std::vector<KeyFrame>& frames);
-		~Animation();
 
 		std::vector<KeyFrame> GetFrames() const { return m_Frames; }
 		const float GetLength() const { return m_Length; }
