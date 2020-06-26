@@ -31,7 +31,6 @@ uniform vec3 cameraPos;
 
 uniform int IsAnimated;
 
-uniform mat4 BindShapeMatrix;
 uniform mat4 JointTransforms[MAX_JOINTS];
 
 void main()
