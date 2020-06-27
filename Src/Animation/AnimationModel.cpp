@@ -4,6 +4,8 @@
 
 #include "DaeLoader.h"
 
+#include "src/Input.h"
+
 namespace Engine {
 
 	AnimationModel::AnimationModel(const std::string& obj_path, const std::string& albedo, const std::string& normal, Shader* shader)
@@ -17,7 +19,7 @@ namespace Engine {
 
 		m_Shader = shader;
 
-		m_Material = new Material(shader, albedo, normal);
+		m_Material = new Material(shader, albedo, normal, "");
 		m_Material->SetProperties(glm::vec3(.0f), .0f);
 
 		m_VertexArray.reset(VAO::Create());
@@ -54,12 +56,13 @@ namespace Engine {
 		animator = new Animator(anim_path.c_str());
 		std::string animationFile = "ObjFiles/Slime-lookAnim.dae";
 		animator->AddAnimation(animationFile, "LookAround");
+		animator->AddAnimation("ObjFiles/weirdJump.dae", "Move");
 
 		m_Skeleton = &animator->GetSkeletonRoot();
 
 		m_Shader = shader;
 
-		m_Material = new Material(shader, albedo, normal);
+		m_Material = new Material(shader, albedo, normal, "Textures/AOSlimer.png");
 		m_Material->SetProperties(glm::vec3(.0f), .0f);
 
 		m_VertexArray.reset(VAO::Create());
@@ -113,6 +116,20 @@ namespace Engine {
 
 	void AnimationModel::Update(double dt)
 	{
+		// For Debugging - Making sure multiple animations work
+		if (Input::IsKeyPressed(GLFW_KEY_1)) {
+			PlayAnimation("LookAround");
+		}
+		else if (Input::IsKeyPressed(GLFW_KEY_2)) {
+			PlayAnimation("LookCute");
+		}
+		else if (Input::IsKeyPressed(GLFW_KEY_3)) {
+			PlayAnimation("Move");
+		}
+		else if (Input::IsKeyPressed(GLFW_KEY_0)) {
+			StopAnimation();
+		}
+
 		animator->Update(dt);
 	}
 
