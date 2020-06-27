@@ -27,7 +27,6 @@
 		accumulator += frameTime;
 
 		while (accumulator >= dt) {
-			game->HandleInput();
 			game->Update(dt);
 			t += dt;
 			accumulator -= dt;
