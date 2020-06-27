@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include "Input.h"
+
 Camera::Camera() { }
 
 Camera::Camera(glm::vec3 position, GLfloat pitch, GLfloat yaw)
@@ -37,21 +39,21 @@ Camera::~Camera()
 {
 }
 
-void Camera::Move(bool* keys, double& dt)
+void Camera::Move(double& dt)
 {
-	if (keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT]) {
+	if (Engine::Input::IsKeyPressed(GLFW_KEY_D) || Engine::Input::IsKeyPressed(GLFW_KEY_RIGHT)) { 
 		m_Theta += 1.f;
 	}	
 	
-	if (keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT]) {
+	if (Engine::Input::IsKeyPressed(GLFW_KEY_A) || Engine::Input::IsKeyPressed(GLFW_KEY_LEFT)) {
 		m_Theta -= 1.f;
 	}
 
-	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP]) {
+	if (Engine::Input::IsKeyPressed(GLFW_KEY_W) || Engine::Input::IsKeyPressed(GLFW_KEY_UP)) {
 		m_Distance -= .1f;
 	}
 
-	if (keys[GLFW_KEY_S] || keys[GLFW_KEY_DOWN]) {
+	if (Engine::Input::IsKeyPressed(GLFW_KEY_S) || Engine::Input::IsKeyPressed(GLFW_KEY_DOWN)) {
 		m_Distance += 0.1f;
 	}
 
@@ -61,16 +63,18 @@ void Camera::Move(bool* keys, double& dt)
 	m_Position.z += zOffset;
 }
 
-float lastX = 0.0f;
-
-void Camera::OnMouseMove(bool* keys, glm::vec2 currPos, glm::vec2 lastPos, double& dt)
+void Camera::OnMouseMove(double& dt)
 {
-	if (keys[GLFW_MOUSE_BUTTON_LEFT] && currPos.x != lastX && ((currPos.x - lastPos.x) > 1.f || (currPos.x - lastPos.x) < -1.f)) {
-		double angleChange = currPos.x * 15.0 * dt;
+	std::pair<float, float> t = Engine::Input::GetMousePosition();
+
+	if (Engine::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) 
+	{
+		float xPos = t.first - m_MouseLastPos.x;
+		double angleChange = xPos * 15.0f * dt;
 		m_Theta -= angleChange;
 	}
 
-	lastX = currPos.x;
+	m_MouseLastPos = glm::vec2(t.first, t.second);
 }
 
 void Camera::OnMouseScroll(GLFWwindow* window, double xPos, double yPos)

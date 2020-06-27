@@ -1,6 +1,11 @@
 #pragma once
 
 #include "Constants.h"
+#include "Window.h"
+#include "Events\Event.h"
+#include "Events\ApplicationEvent.h"
+#include "Events\MouseEvent.h"
+#include "Events\KeyEvent.h"
 #include ".\Renderer\Shader.h"
 #include "Camera.h"
 #include "Texture.h"
@@ -20,55 +25,41 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 #include <vector>
+#include <memory>
 
 namespace Engine {
 	class Game {
 		// --- METHODS ---
 	public:
-		Game() {
-			for (size_t i = 0; i < 1024; ++i) {
-				Keys[i] = 0;
-			}
-		}
-
+		Game();
 		~Game();
 
 		bool Initialize();	// The Game Engine's Awake
 		void Start();		// The Game Engine's Start
-		void HandleInput();
 		void Update(double dt);
 		void Render();
 
-		bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindow); }
+		void OnEvent(Event& e);
+		bool OnWindowClose(WindowCloseEvent& e);
+
+		bool IsRunning() const { return !glfwWindowShouldClose((GLFWwindow*)m_Window->GetNativeWindow()); }
+
+		inline Window& GetWindow() const { return *m_Window; }
+		inline static Game& Get() { return *s_Instance; }
 
 	private:
-		// ** Temporary User Input Methods ** //
-		void CreateCallBacks();
 
 		// TODO: Refactor into appropriate class . . . 
 		void DirectionalShadowMapPass(DirectionalLight* light, Shader* shader);
 		void RenderScene(Shader* shader, bool pass);
 		void RenderPass(Shader* shader);
 
-		static void HandleKeys(GLFWwindow* window, int key, int code, int action, int mode);
-		static void HandleMouse(GLFWwindow* window, double xPos, double yPos);
-		static void HandleMouseScroll(GLFWwindow* window, double xPos, double yPos);
-		static void HandleMouseButton(GLFWwindow* window, int button, int action, int mods);
-		// ** END TEMPORARY ** // 
-
 	// --- VARIABLES ---
-	public:
-		// ** Temporary User Input Variables ** //
-		bool Keys[1024];
-		glm::vec2 LastPos = glm::vec2(0, 0);
-		glm::vec2 LastScrollAmnt = glm::vec2(0, 0);
-		glm::vec2 MouseDelta = glm::vec2(0, 0);
-		glm::vec2 MouseScrollDelta = glm::vec2(0, 0);
-		bool MouseFirstMoved = true;
-		// ** END TEMPORARY ** // 
-
 	private:
+
 		GLFWwindow* m_MainWindow;
+		std::unique_ptr<Window> m_Window;
+
 		Camera m_MainCamera;
 		GLint m_BufferWidth, m_BufferHeight;
 
@@ -93,5 +84,7 @@ namespace Engine {
 		std::vector<Shader*> m_ShaderList;
 
 		Shader m_DirectionalShadowShader;
+
+		static Game* s_Instance;
 	};
 }

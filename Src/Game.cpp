@@ -13,14 +13,21 @@
 
 namespace Engine {
 
+#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+
+	Game* Game::s_Instance = nullptr;
+
+	Game::Game() {
+		s_Instance = this;
+
+		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps("Puzzle Platformer", WINDOW_WIDTH, WINDOW_HEIGHT)));
+		m_Window->SetEventCallback(BIND_EVENT_FN(Game::OnEvent));
+	}
+
 	Game::~Game()
 	{
 		glfwDestroyWindow(m_MainWindow);
 		glfwTerminate();
-
-		for (size_t i = 0; i < 1024; ++i) {
-			Keys[i] = 0;
-		}
 
 		for (size_t i = 0; i < m_ShaderList.size(); ++i) {
 			delete m_ShaderList[i];
@@ -29,38 +36,12 @@ namespace Engine {
 
 	bool Game::Initialize()
 	{
-		// Initialize GLFW
-		if (!glfwInit()) {
-			printf("GLFW Initialization failed!");
-			glfwTerminate();
-			return false;
-		}
+		m_IsRunning = true;
 
-		// Setup GLFW window properties
-		// OpenGL Version
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // No Backwards Compatibility
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);		   // Allow Forwards Compatibility
-
-		m_MainWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_NAME.c_str(), nullptr, nullptr);
-
-		if (!m_MainWindow) {
-			printf("GLFW window creation failed!");
-			glfwTerminate();
-			return false;
-		}
+		m_MainWindow = (GLFWwindow*)m_Window->GetNativeWindow();
 
 		// Get Buffer Size Information
 		glfwGetFramebufferSize(m_MainWindow, &m_BufferWidth, &m_BufferHeight);
-
-		// Set context for GLEW to use
-		glfwMakeContextCurrent(m_MainWindow);
-		// TODO: ^^ Apparently its possible to draw to different windows - perhaps method for the different puzzle platforms/characters?? Switching Window Context 
-		// TODO: ^^ 6/08/2020 - Geometry Shader might be the better option to render each level/"dimension" . . .
-
-		// Handle Key + Mouse Input
-		CreateCallBacks();
 
 		// Keeps cursor in the window
 		//glfwSetInputMode(m_MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -78,24 +59,32 @@ namespace Engine {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_ONE, GL_ONE);
 
 		// Setup Viewport Size
 		glViewport(0, 0, m_BufferWidth, m_BufferHeight);
-
-		// Assigns this window for listening to user input
-		glfwSetWindowUserPointer(m_MainWindow, this);
 
 		// Calculate Projection Matrix
 		GLfloat aspectRatio = (GLfloat)m_BufferWidth / (GLfloat)m_BufferHeight;
 		proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f);
 		ortho = glm::ortho(-aspectRatio, aspectRatio, -20.0f, 20.0f, 0.01f, 100.0f);
-		/*proj = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, 0.0f, 1000.0f);
-		proj = glm::scale(proj, glm::vec3(0.55f, 0.55f, 0.55f));*/
 
 		return true;
 	}
 
 	std::vector<int> tree_locations;
+
+	void Game::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Game::OnWindowClose));
+	}
+	
+	bool Game::OnWindowClose(WindowCloseEvent& e) 
+	{
+		m_IsRunning = false;
+		return false;
+	}
 
 	void Game::Start()
 	{
@@ -142,20 +131,6 @@ namespace Engine {
 		SpotLight s2 = SpotLight(glm::vec3(0.0f, 1.0f, 0.0f), 30.0f, glm::vec3(-1.1f, -2.0f, -2.2f), 1.0f, 0.0f, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.5f);
 		m_SpotLights.push_back(s1);
 		m_SpotLights.push_back(s2);
-	}
-
-	void Game::HandleInput()
-	{
-		// Get + Handle user input events
-		glfwPollEvents();
-	}
-
-	void Game::CreateCallBacks()
-	{
-		glfwSetKeyCallback(m_MainWindow, HandleKeys);
-		glfwSetCursorPosCallback(m_MainWindow, HandleMouse);
-		glfwSetMouseButtonCallback(m_MainWindow, HandleMouseButton);
-		glfwSetScrollCallback(m_MainWindow, HandleMouseScroll);
 	}
 
 	void Game::DirectionalShadowMapPass(DirectionalLight* light, Shader* shader)
@@ -264,75 +239,14 @@ namespace Engine {
 		RenderScene(shader, false);
 	}
 
-	// TODO: Create a custom method for User Events -- Handling Input, Engine Wide Events, Etc . . .
-	void Game::HandleKeys(GLFWwindow* window, int key, int code, int action, int mode)
-	{
-		Game* theGame = static_cast<Game*>(glfwGetWindowUserPointer(window));
-
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-
-		if (key >= 0 && key < 1024) {
-			if (theGame->Keys[key] == false && action == GLFW_PRESS) {
-				theGame->Keys[key] = true;
-			}
-			else if (theGame->Keys[key] == true && action == GLFW_RELEASE) {
-				theGame->Keys[key] = false;
-			}
-		}
-
-		if (key == GLFW_KEY_1 && action == GLFW_RELEASE) {
-			theGame->toon->PlayAnimation("LookAround");
-		}
-		else if (key == GLFW_KEY_2 && action == GLFW_RELEASE) {
-			theGame->toon->PlayAnimation("LookCute");
-		}
-		else if (key == GLFW_KEY_0 && action == GLFW_RELEASE) {
-			theGame->toon->StopAnimation();
-		}
-	}
-
-	void Game::HandleMouse(GLFWwindow* window, double xPos, double yPos)
-	{
-		Game* theGame = static_cast<Game*>(glfwGetWindowUserPointer(window));
-
-		if (theGame->MouseFirstMoved) {
-			theGame->LastPos = glm::vec2(xPos, yPos);
-			theGame->MouseFirstMoved = false;
-		}
-
-		theGame->MouseDelta = glm::vec2((GLfloat)(xPos - theGame->LastPos.x), (GLfloat)(theGame->LastPos.y - yPos));
-		theGame->LastPos = glm::vec2(xPos, yPos);
-	}
-
-	void Game::HandleMouseScroll(GLFWwindow* window, double xPos, double yPos)
-	{
-		Game* theGame = static_cast<Game*>(glfwGetWindowUserPointer(window));
-
-		theGame->m_MainCamera.OnMouseScroll(window, xPos, yPos);
-	}
-
-	void Game::HandleMouseButton(GLFWwindow* window, int key, int action, int mods)
-	{
-		Game* theGame = static_cast<Game*>(glfwGetWindowUserPointer(window));
-
-		if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-			theGame->Keys[key] = true;
-		}
-		else {
-			theGame->Keys[key] = false;
-		}
-	}
-
 	// Update Loop
 	void Game::Update(double dt)
 	{
 		toon->Update(dt);
 
 		// Camera Controls 
-		m_MainCamera.Move(Keys, dt);
-		m_MainCamera.OnMouseMove(Keys, MouseDelta, LastPos, dt);
+		m_MainCamera.Move(dt);
+		m_MainCamera.OnMouseMove(dt);
 	}
 
 	// Render Loop
@@ -352,7 +266,7 @@ namespace Engine {
 		glActiveTexture(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		glfwSwapBuffers(m_MainWindow);
+		m_Window->Update();
 	}
 
 }

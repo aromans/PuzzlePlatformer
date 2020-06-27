@@ -18,8 +18,8 @@ public:
 
 	~Camera();
 
-	void Move(bool* keys, double& dt);
-	void OnMouseMove(bool* keys, glm::vec2 currPos, glm::vec2 lastPos, double& dt);
+	void Move(double& dt);
+	void OnMouseMove(double& dt);
 	void OnMouseScroll(GLFWwindow* window, double xPos, double yPos);
 
 	glm::vec3 GetPosition() const { return m_Position; }
@@ -45,5 +45,7 @@ private:
 	glm::vec3 m_Right;
 
 	glm::vec3 m_WorldUp;
+
+	glm::vec2 m_MouseLastPos;
 };
 
