@@ -1,6 +1,6 @@
 #include "Material.h"
 
-Material::Material(Shader* shader, std::string diffuse_tex, std::string normal_tex)
+Material::Material(Shader* shader, std::string diffuse_tex, std::string normal_tex, std::string ao_tex)
 {
 	if (shader != nullptr) {
 		m_Shader = shader;
@@ -15,10 +15,16 @@ Material::Material(Shader* shader, std::string diffuse_tex, std::string normal_t
 		m_Diffuse.LoadTexture(GL_REPEAT);
 	}
 
-	m_NormalTex = normal_tex;
+	m_HasNormalMap = normal_tex != "";
 	if (normal_tex != "") {
 		m_Normal = Texture(normal_tex.c_str());
 		m_Normal.LoadTexture(GL_REPEAT);
+	}
+
+	m_HasAOMap = ao_tex != "";
+	if (ao_tex != "") {
+		m_AmbientOcclusion = Texture(ao_tex.c_str());
+		m_AmbientOcclusion.LoadTexture(GL_REPEAT);
 	}
 }
 
@@ -36,6 +42,7 @@ void Material::AssignMaterial(bool pass)
 
 		m_Diffuse.UseTexture(0);
 		m_Normal.UseTexture(1);	
+		m_AmbientOcclusion.UseTexture(3);
 	}
 }
 
@@ -43,7 +50,9 @@ void Material::ApplyUniforms()
 {
 	m_Shader->Set1i(0, "material.diffuse");
 	m_Shader->Set1i(1, "material.normal");
+	m_Shader->Set1i(3, "material.ao");
 	m_Shader->SetVec3f(m_Specular, "material.specular");
 	m_Shader->Set1f(m_Shininess, "material.shininess");
-	m_Shader->Set1i(m_NormalTex != "", "material.has_normal_map");
+	m_Shader->Set1i(m_HasNormalMap, "material.has_normal_map");
+	m_Shader->Set1i(m_HasAOMap, "material.has_ao_map");
 }

@@ -12,7 +12,7 @@ namespace Engine {
 		auto parsed_obj = LoadOBJ(obj_path.c_str());
 		m_Mesh = new Mesh(std::get<0>(parsed_obj), std::get<1>(parsed_obj));
 
-		m_Material = new Material(shader, albedo, normal);
+		m_Material = new Material(shader, albedo, normal, "");
 		m_Material->SetProperties(glm::vec3(.0f), .0f);
 
 		m_Shader = shader;

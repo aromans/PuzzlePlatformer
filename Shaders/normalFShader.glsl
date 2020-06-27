@@ -35,9 +35,11 @@ struct SpotLight
 struct Material
 {
 	int has_normal_map;
+	int has_ao_map;
 
 	sampler2D diffuse;
 	sampler2D normal;
+	sampler2D ao;
 	vec3 specular;
 	float shininess;
 };
@@ -114,6 +116,10 @@ float CalcDirectionalShadowFactor(vec3 direction, vec3 normal)
 vec4 CalcLight(Light light, vec3 direction, vec3 normal, float shadowFactor)
 {
 	vec4 ambientColor = vec4(light.color, 1.0) * light.ambientIntensity;
+	
+	if (material.has_ao_map == 1) {
+		ambientColor *= texture(material.ao, fs_in.v_TexCoord).r;
+	}
 
 	float diffuseFactor = max(dot(normalize(direction), normalize(normal)), 0.0);
 
