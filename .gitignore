@@ -1,0 +1,16 @@
+# Binaries
+**/bin/
+**/bin-int/
+Debug/
+Release/
+x64/
+
+# Game files
+*.log
+
+# Visual Studio files and folder
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
