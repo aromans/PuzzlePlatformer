@@ -1,9 +1,6 @@
 # Binaries
 **/bin/
-**/bin-int/
-Debug/
-Release/
-x64/
+bin-int/
 
 # Game files
 *.log
