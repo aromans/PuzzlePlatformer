@@ -11,13 +11,13 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to the root folder (solution directory) ---
 IncludeDir = {}
---IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
---IncludeDir["GLEW"] = "Engine/vendor/GLEW/include"
---IncludeDir["glm"] = "Engine/vendor/glm"
+IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
+IncludeDir["GLAD"] = "Engine/vendor/GLAD/include"
+IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
 
 group "Dependencies"
-    --include "Engine/vendor/GLFW"
-    --include "Engine/vendor/Glad"
+    include "Engine/vendor/GLFW"
+    include "Engine/vendor/GLAD"
     --include "Engine/vendor/imgui"
 
 group ""
@@ -44,18 +44,18 @@ project "Engine"
 
     files {
         "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-        --"%{prj.name}/vendor/glm/glm/**.hpp",
-        --"%{prj.name}/vendor/glm/glm/**.inl"
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/GLM/glm/**.hpp",
+        "%{prj.name}/vendor/GLM/glm/**.inl"
     }
 
     includedirs {
         "Engine/vendor/spdlog/include",
-        "Engine/src"
-        --"%{IncludeDir.GLFW}",
-        --"%{IncludeDir.Glad}",
+        "Engine/src",
+        "%{IncludeDir.GLFW}",
+        "%{IncludeDir.GLAD}",
+        "%{IncludeDir.GLM}"
         --"%{IncludeDir.ImGui}",
-        --"%{IncludeDir.glm}"
     }
 
     --links {
@@ -111,8 +111,8 @@ project "PuzzleGame"
     includedirs {
         "Engine/vendor/spdlog/include",
         "Engine/src",
-        "Engine/vendor"
-        --"%{IncludeDir.glm}"
+        "Engine/vendor",
+        "%{IncludeDir.GLM}"
     }
 
     links {
