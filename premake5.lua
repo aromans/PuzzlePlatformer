@@ -38,15 +38,15 @@ project "Engine"
     --pchheader "enpch.h"
     --pchsource "Engine/src/enpch.cpp"
 
-    defines {
-        "_CRT_SECURE_NO_WARNINGS"
-    }
-
     files {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/vendor/GLM/glm/**.hpp",
         "%{prj.name}/vendor/GLM/glm/**.inl"
+    }
+
+    defines {
+        "_CRT_SECURE_NO_WARNINGS"
     }
 
     includedirs {
@@ -65,7 +65,7 @@ project "Engine"
 
     filter "system:windows"
         systemversion "latest"
-    
+
         defines {
             "ENG_PLATFORM_WINDOWS"
         }
@@ -113,10 +113,6 @@ project "PuzzleGame"
 
     filter "system:windows"
         systemversion "latest"
-        
-        defines {
-            "ENG_PLATFORM_WINDOWS"
-        }
 
     filter "configurations:Debug"
         defines "ENG_DEBUG"
