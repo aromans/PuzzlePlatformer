@@ -13,15 +13,15 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to the root folder (solution directory) ---
 IncludeDir = {}
---IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
+IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
 --IncludeDir["GLAD"] = "Engine/vendor/GLAD/include"
 IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
 
---group "Dependencies"
---    include "Engine/vendor/GLFW"
+group "Dependencies"
+    include "Engine/vendor/GLFW"
 --    include "Engine/vendor/Glad"
 
---group ""
+group ""
 
 --include "Engine/vendor/imgui"
 
@@ -55,16 +55,16 @@ project "Engine"
     includedirs {
         "Engine/vendor/spdlog/include",
         "Engine/src",
-        --"%{IncludeDir.GLFW}",
+        "%{IncludeDir.GLFW}",
         --"%{IncludeDir.GLAD}",
         "%{IncludeDir.GLM}"
         --"%{IncludeDir.ImGui}",
     }
 
     links {
-        --"GLFW",
+        "GLFW",
         --"GLAD",
-        --"opengl32.lib"
+        "opengl32.lib"
     --    "ImGui",
     }
 
