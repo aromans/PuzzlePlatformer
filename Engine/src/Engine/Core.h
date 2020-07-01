@@ -1,11 +1,15 @@
 #pragma once
 
 #ifdef ENG_PLATFORM_WINDOWS
+#if ENG_DYNAMIC_LINK
 	#ifdef ENG_BUILD_DLL
 		#define ENG_API __declspec(dllexport)
 	#else
 		#define ENG_API __declspec(dllimport)
 	#endif
+#else
+	#define ENG_API
+#endif
 #else 
 	#error Engine Only Supports Windows!
 #endif

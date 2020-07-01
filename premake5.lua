@@ -17,8 +17,12 @@ IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
 IncludeDir["GLAD"] = "Engine/vendor/GLAD/include"
 IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
 
-include "Engine/vendor/GLFW"
-include "Engine/vendor/GLAD"
+group "Dependencies"
+    include "Engine/vendor/GLFW"
+    include "Engine/vendor/Glad"
+
+group ""
+
 --include "Engine/vendor/imgui"
 
 projectheaderdir = "%{prj.name}/src/**.h"
@@ -60,8 +64,8 @@ project "Engine"
     links {
         "GLFW",
         "GLAD",
-    --    "ImGui",
         "opengl32.lib"
+    --    "ImGui",
     }
 
     filter "system:windows"
