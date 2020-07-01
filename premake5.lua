@@ -7,6 +7,8 @@ workspace "Engine"
         "Dist"
     }
 
+    startproject = "PuzzleGame"
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to the root folder (solution directory) ---
@@ -15,19 +17,16 @@ IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
 IncludeDir["GLAD"] = "Engine/vendor/GLAD/include"
 IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
 
-group "Dependencies"
-    include "Engine/vendor/GLFW"
-    include "Engine/vendor/GLAD"
-    --include "Engine/vendor/imgui"
-
-group ""
+include "Engine/vendor/GLFW"
+include "Engine/vendor/GLAD"
+--include "Engine/vendor/imgui"
 
 projectheaderdir = "%{prj.name}/src/**.h"
 projectcppdir = "%{prj.name}/src/**.cpp"
 
 project "Engine"
     location "Engine"
-    kind "SharedLib"    --kind "StaticLib"
+    kind "StaticLib"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
@@ -58,12 +57,12 @@ project "Engine"
         --"%{IncludeDir.ImGui}",
     }
 
-    --links {
-    --    "GLFW",
-    --    "Glad",
+    links {
+        "GLFW",
+        "GLAD",
     --    "ImGui",
-    --    "opengl32.lib"
-    --}
+        "opengl32.lib"
+    }
 
     filter "system:windows"
         systemversion "latest"
@@ -71,11 +70,6 @@ project "Engine"
         defines {
             "ENG_PLATFORM_WINDOWS",
             "ENG_BUILD_DLL"
-            --"GLFW_INCLUDE_NONE"
-        }
-
-        postbuildcommands {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/PuzzleGame")
         }
 
     filter "configurations:Debug"
