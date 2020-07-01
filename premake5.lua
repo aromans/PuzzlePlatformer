@@ -1,5 +1,6 @@
 workspace "Engine"
-    architecture "X64"
+    architecture "x86_64"
+    startproject "PuzzleGame"
 
     configurations {
         "Debug",
@@ -7,13 +8,19 @@ workspace "Engine"
         "Dist"
     }
 
-    startproject = "PuzzleGame"
-
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to the root folder (solution directory) ---
 IncludeDir = {}
+IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
+IncludeDir["GLAD"] = "Engine/vendor/GLAD/include"
 IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
+
+group "Dependencies"
+    include "Engine/vendor/GLFW"
+    include "Engine/vendor/GLAD"
+
+group ""
 
 projectheaderdir = "%{prj.name}/src/**.h"
 projectcppdir = "%{prj.name}/src/**.cpp"
@@ -45,15 +52,22 @@ project "Engine"
     includedirs {
         "Engine/vendor/spdlog/include",
         "Engine/src",
+        "%{IncludeDir.GLFW}",
+        "%{IncludeDir.GLAD}",
         "%{IncludeDir.GLM}"
+    }
+
+    links {
+        "GLFW",
+        "GLAD",
+        "opengl32.lib"
     }
 
     filter "system:windows"
         systemversion "latest"
     
         defines {
-            "ENG_PLATFORM_WINDOWS",
-            "ENG_BUILD_DLL"
+            "ENG_PLATFORM_WINDOWS"
         }
 
     filter "configurations:Debug"

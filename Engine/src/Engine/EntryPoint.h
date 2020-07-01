@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef ENG_PLATFORM_WINDOWS
-
 extern Engine::Application* Engine::CreateApplication();
 
 int main(int argc, char** argv)
@@ -14,5 +12,3 @@ int main(int argc, char** argv)
 	app->Run();
 	delete app;
 }
-
-#endif
