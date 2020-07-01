@@ -1,5 +1,6 @@
 workspace "Engine"
-    architecture "X64"
+    architecture "x86_64"
+    startproject "PuzzleGame"
 
     configurations {
         "Debug",
@@ -7,13 +8,17 @@ workspace "Engine"
         "Dist"
     }
 
-    startproject = "PuzzleGame"
-
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to the root folder (solution directory) ---
 IncludeDir = {}
+IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
 IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
+
+group "Dependencies"
+    include "Engine/vendor/GLFW"
+
+group ""
 
 projectheaderdir = "%{prj.name}/src/**.h"
 projectcppdir = "%{prj.name}/src/**.cpp"
@@ -31,10 +36,6 @@ project "Engine"
     --pchheader "enpch.h"
     --pchsource "Engine/src/enpch.cpp"
 
-    defines {
-        "_CRT_SECURE_NO_WARNINGS"
-    }
-
     files {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
@@ -42,18 +43,26 @@ project "Engine"
         "%{prj.name}/vendor/GLM/glm/**.inl"
     }
 
+    defines {
+        "_CRT_SECURE_NO_WARNINGS"
+    }
+
     includedirs {
-        "Engine/vendor/spdlog/include",
-        "Engine/src",
+        "%{prj.name}/src",
+        "%{prj.name}/vendor/spdlog/include",
+        "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLM}"
+    }
+
+    links {
+        "GLFW",
+        "opengl32.lib"
     }
 
     filter "system:windows"
         systemversion "latest"
     
         defines {
-            "ENG_PLATFORM_WINDOWS",
-            "ENG_BUILD_DLL"
         }
 
     filter "configurations:Debug"
@@ -99,10 +108,6 @@ project "PuzzleGame"
 
     filter "system:windows"
         systemversion "latest"
-        
-        defines {
-            "ENG_PLATFORM_WINDOWS"
-        }
 
     filter "configurations:Debug"
         defines "ENG_DEBUG"
