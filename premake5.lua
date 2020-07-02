@@ -1,5 +1,5 @@
 workspace "Engine"
-    architecture "x86_64"
+    architecture "x64"
     startproject "PuzzleGame"
 
     configurations {
@@ -14,7 +14,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
 IncludeDir["GLAD"] = "Engine/vendor/GLAD/include"
-IncludeDir["GLM"] = "Engine/vendor/GLM/glm"
+IncludeDir["GLM"] = "Engine/vendor/GLM"
 
 group "Dependencies"
     include "Engine/vendor/GLFW"
@@ -35,18 +35,14 @@ project "Engine"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-    --pchheader "enpch.h"
-    --pchsource "Engine/src/enpch.cpp"
+    pchheader "Epch.h"
+    pchsource "Engine/src/Epch.cpp"
 
     files {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/vendor/GLM/glm/**.hpp",
-        "%{prj.name}/vendor/GLM/glm/**.inl"
-    }
-
-    defines {
-        "_CRT_SECURE_NO_WARNINGS"
+        "%{prj.name}/src/**.hpp",
+        "%{prj.name}/src/**.cpp"
     }
 
     includedirs {
@@ -63,11 +59,16 @@ project "Engine"
         "opengl32.lib"
     }
 
+    defines {
+        "_CRT_SECURE_NO_WARNINGS"
+    }
+
     filter "system:windows"
         systemversion "latest"
 
         defines {
-            "ENG_PLATFORM_WINDOWS"
+            "ENG_PLATFORM_WINDOWS",
+            "ENG_BUILD_DLL"
         }
 
     filter "configurations:Debug"
@@ -95,24 +96,30 @@ project "PuzzleGame"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-    files {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-    }
-
-    includedirs {
-        "Engine/vendor/spdlog/include",
-        "Engine/src",
-        "Engine/vendor",
-        "%{IncludeDir.GLM}"
-    }
-
     links {
         "Engine"
     }
 
+    files {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/**.hpp",
+        "%{prj.name}/src/**.cpp"
+    }
+
+    includedirs {
+        "%{prj.name}/src",
+        "Engine/src",
+        "Engine/vendor/spdlog/include",
+        "%{IncludeDir.GLM}"
+    }
+
     filter "system:windows"
         systemversion "latest"
+
+        defines {
+            "ENG_PLATFORM_WINDOWS"
+        }
 
     filter "configurations:Debug"
         defines "ENG_DEBUG"
