@@ -4,9 +4,6 @@
 
 #include <GLFW/glfw3.h>
 
-//struct GLFWwindow;
-//struct VAO;
-
 namespace Engine {
 
 	class OpenGLRenderer

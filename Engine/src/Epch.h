@@ -24,8 +24,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <Engine/Core/Core.h>
 #include <Engine/Core/Log.h>
-//#include <Engine/Core/Events/Event.h>
+#include <Engine/Core/Events/Event.h>
 
 // Parsers
 //#include "..\Parsers\pugixml-1.10\pugiconfig.hpp"

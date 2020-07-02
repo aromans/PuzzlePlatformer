@@ -88,7 +88,7 @@ namespace Engine {
 			}
 		}
 		else {
-			printf("ERROR: Error loading from the path '%s'!", path);
+			ENG_CORE_ERROR("ERROR: Error loading from the path '%s'!", path);
 		}
 
 		filestream.close();
@@ -100,7 +100,7 @@ namespace Engine {
 		m_ShaderID = glCreateProgram();
 
 		if (!m_ShaderID) {
-			printf("ERROR: Error creating shader program!\n");
+			ENG_CORE_ERROR("ERROR: Error creating shader program!\n");
 			return;
 		}
 
@@ -118,7 +118,7 @@ namespace Engine {
 		glGetProgramiv(m_ShaderID, GL_LINK_STATUS, &result);
 		if (!result) {
 			glGetProgramInfoLog(m_ShaderID, sizeof(eLog), nullptr, eLog);
-			printf("ERROR: Error linking program: '%s'\n", eLog);
+			ENG_CORE_ERROR("ERROR: Error linking program: '%s'\n", eLog);
 			return;
 		}
 
@@ -126,7 +126,7 @@ namespace Engine {
 		glGetProgramiv(m_ShaderID, GL_VALIDATE_STATUS, &result);
 		if (!result) {
 			glGetProgramInfoLog(m_ShaderID, sizeof(eLog), nullptr, eLog);
-			printf("ERROR: Error validating program: '%s'\n", eLog);
+			ENG_CORE_ERROR("ERROR: Error validating program: '%s'\n", eLog);
 			return;
 		}
 
@@ -146,7 +146,7 @@ namespace Engine {
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if (!result) {
 			glGetProgramInfoLog(shader, sizeof(eLog), nullptr, eLog);
-			printf("ERROR: Error compiling the %d shader: '%s'\n", shaderType, eLog);
+			ENG_CORE_ERROR("ERROR: Error compiling the %d shader: '%s'\n", shaderType, eLog);
 		}
 
 		return shader;
