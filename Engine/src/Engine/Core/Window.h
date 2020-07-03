@@ -4,7 +4,6 @@
 #include "Events/Event.h"
 
 namespace Engine {
-
 	struct WindowProps {
 		std::string Title;
 		unsigned int Width;
@@ -26,6 +25,7 @@ namespace Engine {
 
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
+		virtual double GetTime() const = 0;
 
 		// Event Attributes
 		virtual void SetEventCallback(const EventCallBackFn& callback) = 0;
@@ -33,7 +33,6 @@ namespace Engine {
 		virtual void* GetNativeWindow() const = 0;
 
 		// Must be implemented per platform
-		static Window* Create(const WindowProps& props = WindowProps());
+		static std::unique_ptr<Window> Create(const WindowProps& props = WindowProps());
 	};
-
 }

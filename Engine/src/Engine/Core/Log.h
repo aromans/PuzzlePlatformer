@@ -7,7 +7,6 @@
 #include "spdlog/fmt/ostr.h"
 
 namespace Engine {
-
 	class Log
 	{
 	public:
@@ -19,7 +18,6 @@ namespace Engine {
 		static std::shared_ptr<spdlog::logger> s_CoreLogger;
 		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 	};
-
 }
 
 // Core Log Macros
@@ -35,4 +33,3 @@ namespace Engine {
 #define WARN(...)         ::Engine::Log::ClientLogger()->warn(__VA_ARGS__)
 #define ERROR(...)        ::Engine::Log::ClientLogger()->error(__VA_ARGS__)
 #define FATAL(...)        ::Engine::Log::ClientLogger()->fatal(__VA_ARGS__)
-

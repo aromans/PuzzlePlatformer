@@ -3,7 +3,6 @@
 #include "Engine/Renderer/Buffers.h"
 
 namespace Engine {
-
 	class OpenGLVBO : public VBO
 	{
 	public:
@@ -37,7 +36,4 @@ namespace Engine {
 		unsigned int m_IBO;
 		size_t m_Count;
 	};
-
 }
-
-

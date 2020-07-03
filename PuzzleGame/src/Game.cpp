@@ -92,7 +92,7 @@
 	//	dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN_TO(Character::MoveEvent, toon));
 	//}
 	//
-	//bool Game::OnWindowClose(WindowCloseEvent& e) 
+	//bool Game::OnWindowClose(WindowCloseEvent& e)
 	//{
 	//	m_IsRunning = false;
 	//	return false;
@@ -119,7 +119,7 @@
 
 	//	lvl_height = 3; lvl_width = 3;
 	//	tree_locations = { 8 };// 4, 6, 7, 8, 12, 16, 17 };
-	//	
+	//
 	//	float x = lvl_width % 2 == 0 ? -0.5f : 0.0f;
 	//	float z = -(lvl_height / 2) - (0.1f * (lvl_height / 2));
 	//	z = lvl_height % 2 == 0 ? z + 0.5f : z;
@@ -269,7 +269,7 @@
 	//	// TODO: - Send Update Tick to Game Code
 	//	toon->Update(dt);
 
-	//	// Camera Controls 
+	//	// Camera Controls
 	//	m_MainCamera.Move(dt);
 	//	m_MainCamera.OnMouseMove(dt);
 	//}
@@ -281,18 +281,18 @@
 
 	//	// TODO: Render Command Clear/Clear-Color
 
-	//	// TODO: Renderer Command Queue 
+	//	// TODO: Renderer Command Queue
 	//	Renderer::BeginScene(); // TODO: Pass in Lights, Cameras, Environment, Level, Scene, Etc. . .
 	//	{
 	//		DirectionalShadowMapPass(&m_Light, shader);
 	//		RenderPass(shader);
 
-	//		// Renderer::Submit() <- TODO: Template Function Submitting geometry accordingly 
+	//		// Renderer::Submit() <- TODO: Template Function Submitting geometry accordingly
 
 	//		Renderer::EndScene();
 	//	}
 
-	//	// Renderer::Flush() <- TODO: Multi-Threading (Separate Thread) 
+	//	// Renderer::Flush() <- TODO: Multi-Threading (Separate Thread)
 
 	//	glUseProgram(0);
 	//	glActiveTexture(0);

@@ -2,10 +2,8 @@
 #include "OpenGLRenderer.h"
 
 namespace Engine {
-
 	OpenGLRenderer::OpenGLRenderer(GLFWwindow* window) : m_WindowHandle(window)
 	{
-
 	}
 
 	void OpenGLRenderer::Init()

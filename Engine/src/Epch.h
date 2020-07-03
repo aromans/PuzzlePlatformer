@@ -1,8 +1,8 @@
 #pragma once
 
-//#ifdef ENG_PLATFORM_WINDOWs
-////#include "Window.h"
-//#endif
+#ifdef ENG_PLATFORM_WINDOWs
+#include "Engine/Core/Window.h"
+#endif
 
 #include <algorithm>
 #include <functional>

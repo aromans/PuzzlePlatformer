@@ -3,7 +3,6 @@
 #include "Engine/Platform/OpenGL/OpenGLBuffers.h"
 
 namespace Engine {
-
 	class VAO
 	{
 	public:
@@ -20,6 +19,4 @@ namespace Engine {
 
 		static VAO* Create();
 	};
-
 }
-

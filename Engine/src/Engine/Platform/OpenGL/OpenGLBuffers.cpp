@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 
 namespace Engine {
-
 	OpenGLVBO::OpenGLVBO(const void* data, size_t size) : m_Count(size)
 	{
 		glCreateBuffers(1, &m_VBO);
@@ -50,5 +49,4 @@ namespace Engine {
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-
 }

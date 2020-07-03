@@ -3,7 +3,6 @@
 #include "Engine/Core/Input.h"
 
 namespace Engine {
-
 	class WindowsInput : public Input
 	{
 	protected:
@@ -14,8 +13,5 @@ namespace Engine {
 		virtual bool IsMouseButtonPressedImpl(int button) override;
 
 		virtual std::pair<float, float> GetMousePositionImpl() override;
-
 	};
-
 }
-

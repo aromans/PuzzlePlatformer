@@ -4,9 +4,7 @@
 #include "Engine/Platform/OpenGL/OpenGLVAO.h"
 
 namespace Engine {
-
 	VAO* VAO::Create() {
 		return new OpenGLVAO();
 	}
-
 }

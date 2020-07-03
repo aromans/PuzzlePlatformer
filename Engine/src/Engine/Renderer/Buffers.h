@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 
 namespace Engine {
-
 	struct BufferElement {
 		const void* Offset;
 		int Count;
@@ -42,6 +41,4 @@ namespace Engine {
 
 		static IBO* Create(const void* data, size_t size);
 	};
-
 }
-

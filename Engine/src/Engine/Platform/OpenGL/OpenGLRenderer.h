@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 namespace Engine {
-
 	class OpenGLRenderer
 	{
 	public:
@@ -29,6 +28,4 @@ namespace Engine {
 	private:
 		GLFWwindow* m_WindowHandle;
 	};
-
 }
-

@@ -4,7 +4,6 @@
 #include "Event.h"
 
 namespace Engine {
-
 	class WindowResizeEvent : public Event {
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
@@ -56,5 +55,4 @@ namespace Engine {
 		EVENT_CLASS_TYPE(OnRender);
 		EVENT_CLASS_CATEGORY(EventCategoryApplication);
 	};
-
 }

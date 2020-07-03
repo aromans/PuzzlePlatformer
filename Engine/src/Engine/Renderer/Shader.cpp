@@ -46,7 +46,6 @@ namespace Engine {
 
 	void Shader::SetVec4f(glm::vec4 value, const GLchar* name)
 	{
-
 		this->Bind();
 
 		glUniform4fv(glGetUniformLocation(this->m_ShaderID, name), 1, glm::value_ptr(value));

@@ -5,8 +5,9 @@
 #include "Engine/Core/Events/KeyEvent.h"
 #include "Engine/Core/Events/MouseEvent.h"
 
-namespace Engine {
+#include <glad/glad.h>
 
+namespace Engine {
 	static bool s_GLFWInitialized = false;
 
 	static void GLFWErrorCallback(int error, const char* description)
@@ -14,9 +15,9 @@ namespace Engine {
 		ENG_CORE_ERROR("GLFW error (%s): %s", error, description);
 	}
 
-	Window* Window::Create(const WindowProps& data)
+	std::unique_ptr<Window> Window::Create(const WindowProps& data)
 	{
-		return new WindowsWindow(data);
+		return std::make_unique<WindowsWindow>(data);
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& data) {
@@ -61,8 +62,19 @@ namespace Engine {
 		// Set context for GLEW to use
 		glfwMakeContextCurrent(m_Window);
 
+		// Assure GLAD loads 
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			ENG_CORE_ERROR("GLAD Initialization failed!");
+			glfwTerminate();
+			return;
+		}
+
 		// Assigns this window for listening to user input
 		glfwSetWindowUserPointer(m_Window, &m_Data);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
 
 		// Set GLFW event callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
@@ -161,5 +173,4 @@ namespace Engine {
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
-
 }

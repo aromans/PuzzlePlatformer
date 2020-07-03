@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef ENG_PLATFORM_WINDOWS
-	#error Engine only currently supports Windows!
+#error Engine only currently supports Windows!
 #endif
 
 #define BIT(x) (1 << x)

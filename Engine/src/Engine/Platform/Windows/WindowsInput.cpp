@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 
 namespace Engine {
-
 	Input* Input::s_Instance = new WindowsInput();
 
 	bool WindowsInput::IsKeyPressedImpl(int keycode)
@@ -39,5 +38,4 @@ namespace Engine {
 		//return { (float)xPos, (float)yPos };
 		return {};
 	}
-
 }

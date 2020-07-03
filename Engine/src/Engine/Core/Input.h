@@ -3,9 +3,7 @@
 #include "Epch.h"
 
 namespace Engine {
-
 	class Input {
-
 	public:
 		inline static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
 		inline static bool IsKeyReleased(int keycode) { return s_Instance->IsKeyReleasedImpl(keycode); }
@@ -18,6 +16,5 @@ namespace Engine {
 		virtual std::pair<float, float> GetMousePositionImpl() = 0;
 	private:
 		static Input* s_Instance;
-
 	};
 }

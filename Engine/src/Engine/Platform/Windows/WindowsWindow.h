@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 namespace Engine {
-
 	class WindowsWindow : public Window {
 	public:
 		WindowsWindow(const WindowProps& data);
@@ -15,6 +14,7 @@ namespace Engine {
 
 		inline unsigned int GetWidth() const override { return m_Data.Width; }
 		inline unsigned int GetHeight() const override { return m_Data.Height; }
+		inline double GetTime() const override { return glfwGetTime(); }
 
 		// Window Attributes
 		inline void SetEventCallback(const EventCallBackFn& callback) override { m_Data.EventCallBack = callback; }
@@ -37,5 +37,4 @@ namespace Engine {
 
 		WindowData m_Data;
 	};
-
 }

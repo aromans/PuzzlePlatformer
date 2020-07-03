@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 
 namespace Engine {
-
 	OpenGLVAO::OpenGLVAO()
 	{
 		glCreateVertexArrays(1, &m_VAO);

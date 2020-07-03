@@ -4,7 +4,6 @@
 #include "Engine/Renderer/Buffers.h"
 
 namespace Engine {
-
 	class OpenGLVAO : public VAO
 	{
 	public:
@@ -28,6 +27,4 @@ namespace Engine {
 		std::vector<VBO*> m_VertexBuffer;
 		IBO* m_IndexBuffer;
 	};
-
 }
-

@@ -4,7 +4,6 @@
 #include "Event.h"
 
 namespace Engine {
-
 	class KeyEvent : public Event {
 	public:
 		inline int GetKeyButton() const { return m_Key; }
@@ -59,5 +58,4 @@ namespace Engine {
 
 		EVENT_CLASS_TYPE(KeyTyped);
 	};
-
 }

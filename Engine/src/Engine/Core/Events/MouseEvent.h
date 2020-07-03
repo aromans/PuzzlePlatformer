@@ -4,10 +4,9 @@
 #include "Event.h"
 
 namespace Engine {
-
 	class MouseMovedEvent : public Event {
 	public:
-		MouseMovedEvent(float x, float y) 
+		MouseMovedEvent(float x, float y)
 			: m_XPos(x), m_YPos(y) { }
 
 		inline float GetXPos() const { return m_XPos; }
@@ -27,7 +26,7 @@ namespace Engine {
 
 	class MouseScrolledEvent : public Event {
 	public:
-		MouseScrolledEvent(float xOffset, float yOffset) 
+		MouseScrolledEvent(float xOffset, float yOffset)
 			: m_XOffset(xOffset), m_YOffset(yOffset) { }
 
 		inline float GetXOffset() const { return m_XOffset; }
@@ -45,7 +44,7 @@ namespace Engine {
 	private:
 		float m_XOffset, m_YOffset;
 	};
-	
+
 	class MouseButtonEvent : public Event {
 	public:
 		inline int GetMouseButton() const { return m_Button; }
@@ -57,10 +56,9 @@ namespace Engine {
 		int m_Button;
 	};
 
-
 	class MouseButtonPressedEvent : public MouseButtonEvent {
 	public:
-		MouseButtonPressedEvent(int button) 
+		MouseButtonPressedEvent(int button)
 			: MouseButtonEvent(button) { }
 
 		std::string ToString() const override {
@@ -74,7 +72,7 @@ namespace Engine {
 
 	class MouseButtonReleasedEvent : public MouseButtonEvent {
 	public:
-		MouseButtonReleasedEvent(int button) 
+		MouseButtonReleasedEvent(int button)
 			: MouseButtonEvent(button) { }
 
 		std::string ToString() const override {

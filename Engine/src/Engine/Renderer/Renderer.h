@@ -3,7 +3,6 @@
 #include "VAO.h"
 
 namespace Engine {
-
 	class Renderer
 	{
 	public:
@@ -12,6 +11,4 @@ namespace Engine {
 
 		static void Submit(const VAO& vertexArray);
 	};
-
 }
-

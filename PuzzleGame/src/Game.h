@@ -62,7 +62,7 @@
 //
 //	//private:
 //
-//	//	// TODO: Refactor into appropriate class . . . 
+//	//	// TODO: Refactor into appropriate class . . .
 //	//	void DirectionalShadowMapPass(DirectionalLight* light, Shader* shader);
 //	//	void RenderScene(Shader* shader, bool pass);
 //	//	void RenderPass(Shader* shader);
@@ -76,7 +76,7 @@
 //		//Camera m_MainCamera;
 //		//GLint m_BufferWidth, m_BufferHeight;
 //
-//		//// TODO: Level Class 
+//		//// TODO: Level Class
 //		//int lvl_width;
 //		//int lvl_height;
 //

@@ -3,15 +3,12 @@
 #include "Engine/Platform/OpenGL/OpenGLRenderer.h"
 
 namespace Engine {
-
-	void Renderer::BeginScene() 
+	void Renderer::BeginScene()
 	{
-	
 	}
 
-	void Renderer::EndScene() 
+	void Renderer::EndScene()
 	{
-	
 	}
 
 	void Renderer::Submit(const VAO& vertexArray)
@@ -27,5 +24,4 @@ namespace Engine {
 		}
 		vertexArray.Unbind();
 	}
-
 }

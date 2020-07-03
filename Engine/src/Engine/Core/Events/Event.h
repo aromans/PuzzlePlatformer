@@ -3,14 +3,11 @@
 #include "Epch.h"
 
 namespace Engine {
-
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; }\
 							   virtual EventType GetEventType() const override { return GetStaticType(); }\
 							   virtual const char* GetName() const override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
-
-#define BIT(x) (1 << x) 
 
 	enum class EventType {
 		None = 0,
@@ -23,9 +20,9 @@ namespace Engine {
 	enum EventCategory {
 		None = 0,
 		EventCategoryApplication = BIT(0),
-		EventCategoryInput		 = BIT(1),
-		EventCategoryKeyboard	 = BIT(2),
-		EventCategoryMouse		 = BIT(3),
+		EventCategoryInput = BIT(1),
+		EventCategoryKeyboard = BIT(2),
+		EventCategoryMouse = BIT(3),
 		EventCategoryMouseButton = BIT(4)
 	};
 
