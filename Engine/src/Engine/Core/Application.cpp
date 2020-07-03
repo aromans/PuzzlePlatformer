@@ -22,7 +22,7 @@ namespace Engine {
 	{
 	}
 
-	void Application::OnInit()
+	void Application::Init()
 	{
 		// framebuffer configuration
 		// -------------------------
@@ -59,7 +59,8 @@ namespace Engine {
 
 	void Application::Run()
 	{
-		OnInit();
+		Init();	 // Engine Initialization
+		Awake(); // Application Initialization
 		while (m_IsRunning)
 		{
 			float time = m_Window->GetTime();

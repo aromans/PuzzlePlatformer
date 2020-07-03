@@ -17,7 +17,9 @@ namespace Engine {
 
 		void Run();
 
-		virtual void OnInit();
+		void Init();
+
+		virtual void Awake() {}
 		virtual void OnShutdown() {}
 		virtual void OnUpdate(double& dt) {}
 		virtual void OnRender();
