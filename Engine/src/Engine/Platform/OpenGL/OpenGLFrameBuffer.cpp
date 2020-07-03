@@ -8,6 +8,7 @@ namespace Engine {
 	{
 		m_FBO = 0;
 		m_DepthId = 0;
+		m_ColorId = 0;
 		Initialize();
 	}
 

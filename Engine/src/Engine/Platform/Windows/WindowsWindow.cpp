@@ -12,7 +12,7 @@ namespace Engine {
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
-		ENG_CORE_ERROR("GLFW error (%s): %s", error, description);
+		ENG_CORE_ERROR("GLFW ERROR {0} - Error: {1}", error, description);
 	}
 
 	std::unique_ptr<Window> Window::Create(const WindowProps& data)
@@ -21,6 +21,9 @@ namespace Engine {
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& data) {
+
+		glfwSetErrorCallback(GLFWErrorCallback);
+
 		Init(data);
 	}
 
