@@ -4,6 +4,7 @@
 
 #include "Engine/Core/Core.h"
 #include "Engine/Core/Window.h"
+#include "Engine/Core/Scene.h"
 
 #include "Engine/Renderer/FrameBuffer.h"
 #include "Engine/Core/Events/ApplicationEvent.h"
@@ -32,6 +33,11 @@ namespace Engine {
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 
+	protected:
+		std::unique_ptr<Scene> m_ActiveScene;
+		glm::mat4 m_Projection;
+		glm::mat4 m_Orthographic;
+
 	private:
 		std::unique_ptr<Window> m_Window;
 
@@ -39,9 +45,6 @@ namespace Engine {
 		double m_LastTime;
 
 		glm::vec2 m_Viewport = glm::vec2(0.0f);
-
-		glm::mat4 m_Projection;
-		glm::mat4 m_Orthographic;
 
 		std::shared_ptr<FrameBuffer> m_FrameBuffer;
 

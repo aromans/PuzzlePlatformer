@@ -15,6 +15,7 @@ namespace Engine {
 		s_Instance = this;
 
 		m_Window = Window::Create(WindowProps("Puzzle Platformer", 1366, 768));
+		m_ActiveScene = std::make_unique<Scene>();
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 	}
 

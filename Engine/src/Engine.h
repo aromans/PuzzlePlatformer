@@ -7,4 +7,6 @@
 #include "Engine/Core/Input.h"
 #include "Engine/Core/KeyCodes.h"
 
+#include "Engine/Core/Model.h"
+
 #include "Engine/EntryPoint.h"	// Entry Point

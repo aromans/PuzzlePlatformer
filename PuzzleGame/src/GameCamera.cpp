@@ -1,13 +1,13 @@
-#include "Camera.h"
+#include "GameCamera.h"
 
 #include <Engine/Core/Input.h>
 
-Camera::Camera()
+GameCamera::GameCamera()
 {
 
 }
 
-Camera::Camera(glm::vec3 position, float pitch, float yaw)
+GameCamera::GameCamera(glm::vec3 position, float pitch, float yaw)
 {
 	m_Position = position;
 
@@ -21,7 +21,7 @@ Camera::Camera(glm::vec3 position, float pitch, float yaw)
 	CalculateLocalPosition();
 }
 
-Camera::Camera(glm::vec3 position, glm::vec3 target)
+GameCamera::GameCamera(glm::vec3 position, glm::vec3 target)
 {
 	m_Position = position;
 	m_TargetPosition = target;
@@ -38,11 +38,11 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
 	CalculateLocalPosition();
 }
 
-Camera::~Camera()
+GameCamera::~GameCamera()
 {
 }
 
-void Camera::Move(double& dt)
+void GameCamera::Move(double& dt)
 {
 	if (Engine::Input::IsKeyPressed(ENG_KEY_D) || Engine::Input::IsKeyPressed(ENG_KEY_RIGHT)) { 
 		m_Theta += 1.f;
@@ -66,7 +66,7 @@ void Camera::Move(double& dt)
 	m_Position.z += zOffset;
 }
 
-void Camera::OnMouseMove(double& dt)
+void GameCamera::OnMouseMove(double& dt)
 {
 	std::pair<float, float> t = Engine::Input::GetMousePosition();
 
@@ -80,12 +80,12 @@ void Camera::OnMouseMove(double& dt)
 	m_MouseLastPos = glm::vec2(t.first, t.second);
 }
 
-glm::mat4 Camera::CalculateViewMatrix()
+glm::mat4 GameCamera::CalculateViewMatrix()
 {
 	return glm::lookAt(m_Position, m_TargetPosition, m_WorldUp);
 }
 
-void Camera::CalculateLocalPosition()
+void GameCamera::CalculateLocalPosition()
 {
 	m_Front = glm::normalize(m_Direction);
 	m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));
